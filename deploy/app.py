@@ -8,58 +8,58 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. TEAM LOGOS DICTIONARY & HELPER
+# 1. FIXED TEAM LOGOS DICTIONARY & HELPER
 # ==========================================
 TEAM_LOGOS = {
-    "arsenal": "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg",
-    "aston villa": "https://upload.wikimedia.org/wikipedia/en/f/f9/Aston_Villa_FC_crest_%282016%29.svg",
-    "bournemouth": "https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg",
-    "brentford": "https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg",
-    "brighton": "https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg",
-    "brighton & hove albion": "https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg",
-    "burnley": "https://upload.wikimedia.org/wikipedia/en/6/62/Burnley_F.C._logo.svg",
-    "cardiff": "https://upload.wikimedia.org/wikipedia/en/3/3c/Cardiff_City_crest.svg",
-    "cardiff city": "https://upload.wikimedia.org/wikipedia/en/3/3c/Cardiff_City_crest.svg",
-    "chelsea": "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg",
-    "crystal palace": "https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg",
-    "everton": "https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg",
-    "fulham": "https://upload.wikimedia.org/wikipedia/en/7/70/Fulham_FC_%28shield%29.svg",
-    "huddersfield": "https://upload.wikimedia.org/wikipedia/en/7/7d/Huddersfield_Town_A.F.C._logo.svg",
-    "huddersfield town": "https://upload.wikimedia.org/wikipedia/en/7/7d/Huddersfield_Town_A.F.C._logo.svg",
-    "ipswich": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town_FC_logo.svg",
-    "ipswich town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town_FC_logo.svg",
-    "leeds": "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg",
-    "leeds united": "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg",
-    "leicester": "https://upload.wikimedia.org/wikipedia/en/2/2d/Leicester_City_crest.svg",
-    "leicester city": "https://upload.wikimedia.org/wikipedia/en/2/2d/Leicester_City_crest.svg",
-    "liverpool": "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg",
-    "luton": "https://upload.wikimedia.org/wikipedia/en/9/9d/LutonTownFC2009.svg",
-    "luton town": "https://upload.wikimedia.org/wikipedia/en/9/9d/LutonTownFC2009.svg",
-    "manchester city": "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
-    "manchester united": "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg",
-    "newcastle": "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg",
-    "newcastle united": "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg",
-    "norwich": "https://upload.wikimedia.org/wikipedia/en/8/8c/Norwich_City_FC_logo.svg",
-    "norwich city": "https://upload.wikimedia.org/wikipedia/en/8/8c/Norwich_City_FC_logo.svg",
-    "nott'm forest": "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg",
-    "nottingham forest": "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg",
-    "sheffield united": "https://upload.wikimedia.org/wikipedia/en/9/9c/Sheffield_United_FC_logo.svg",
-    "sheffield utd": "https://upload.wikimedia.org/wikipedia/en/9/9c/Sheffield_United_FC_logo.svg",
-    "southampton": "https://upload.wikimedia.org/wikipedia/en/c/c9/FC_Southampton.svg",
-    "stoke": "https://upload.wikimedia.org/wikipedia/en/2/29/Stoke_City_FC.svg",
-    "stoke city": "https://upload.wikimedia.org/wikipedia/en/2/29/Stoke_City_FC.svg",
-    "sunderland": "https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg",
-    "swansea": "https://upload.wikimedia.org/wikipedia/en/f/f9/Swansea_City_AFC_logo.svg",
-    "swansea city": "https://upload.wikimedia.org/wikipedia/en/f/f9/Swansea_City_AFC_logo.svg",
-    "tottenham": "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg",
-    "tottenham hotspur": "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg",
-    "watford": "https://upload.wikimedia.org/wikipedia/en/e/e2/Watford.svg",
-    "west brom": "https://upload.wikimedia.org/wikipedia/en/8/8b/West_Bromwich_Albion.svg",
-    "west bromwich albion": "https://upload.wikimedia.org/wikipedia/en/8/8b/West_Bromwich_Albion.svg",
-    "west ham": "https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg",
-    "west ham united": "https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg",
-    "wolves": "https://upload.wikimedia.org/wikipedia/en/c/fc/Wolverhampton_Wanderers.svg",
-    "wolverhampton wanderers": "https://upload.wikimedia.org/wikipedia/en/c/fc/Wolverhampton_Wanderers.svg",
+    "arsenal": "https://content.sportslogos.net/logos/69/3478/full/arsenal_fc_logo_20038848.png",
+    "aston villa": "https://content.sportslogos.net/logos/69/3479/full/aston_villa_logo_primary_2016_sportslogosnet-2234.png",
+    "bournemouth": "https://content.sportslogos.net/logos/69/3480/full/afc_bournemouth_logo_primary_20146039.png",
+    "brentford": "https://content.sportslogos.net/logos/69/3481/full/brentford_fc_logo_primary_20172081.png",
+    "brighton": "https://content.sportslogos.net/logos/69/3482/full/brighton__hove_albion_logo_primary_20124803.png",
+    "brighton & hove albion": "https://content.sportslogos.net/logos/69/3482/full/brighton__hove_albion_logo_primary_20124803.png",
+    "burnley": "https://content.sportslogos.net/logos/69/3483/full/burnley_fc_logo_primary_20162817.png",
+    "cardiff": "https://content.sportslogos.net/logos/69/3484/full/cardiff_city_logo_primary_20158863.png",
+    "cardiff city": "https://content.sportslogos.net/logos/69/3484/full/cardiff_city_logo_primary_20158863.png",
+    "chelsea": "https://content.sportslogos.net/logos/69/3485/full/chelsea_fc_logo_primary_20066723.png",
+    "crystal palace": "https://content.sportslogos.net/logos/69/3486/full/crystal_palace_fc_logo_primary_2022_sportslogosnet-5373.png",
+    "everton": "https://content.sportslogos.net/logos/69/3487/full/everton_fc_logo_primary_20151125.png",
+    "fulham": "https://content.sportslogos.net/logos/69/3488/full/fulham_fc_logo_primary_20023608.png",
+    "huddersfield": "https://content.sportslogos.net/logos/69/3489/full/huddersfield_town_logo_primary_2019_sportslogosnet-2415.png",
+    "huddersfield town": "https://content.sportslogos.net/logos/69/3489/full/huddersfield_town_logo_primary_2019_sportslogosnet-2415.png",
+    "ipswich": "https://content.sportslogos.net/logos/69/3490/full/ipswich_town_logo_primary_19959616.png",
+    "ipswich town": "https://content.sportslogos.net/logos/69/3490/full/ipswich_town_logo_primary_19959616.png",
+    "leeds": "https://content.sportslogos.net/logos/69/3491/full/leeds_united_logo_primary_19992642.png",
+    "leeds united": "https://content.sportslogos.net/logos/69/3491/full/leeds_united_logo_primary_19992642.png",
+    "leicester": "https://content.sportslogos.net/logos/69/3492/full/leicester_city_logo_primary_20102602.png",
+    "leicester city": "https://content.sportslogos.net/logos/69/3492/full/leicester_city_logo_primary_20102602.png",
+    "liverpool": "https://content.sportslogos.net/logos/69/3493/full/liverpool_fc_logo_primary_20124748.png",
+    "luton": "https://content.sportslogos.net/logos/69/3494/full/luton_town_logo_primary_20092261.png",
+    "luton town": "https://content.sportslogos.net/logos/69/3494/full/luton_town_logo_primary_20092261.png",
+    "manchester city": "https://content.sportslogos.net/logos/69/3495/full/manchester_city_logo_primary_20177726.png",
+    "manchester united": "https://content.sportslogos.net/logos/69/3496/full/manchester_united_logo_primary_19984916.png",
+    "newcastle": "https://content.sportslogos.net/logos/69/3497/full/newcastle_united_logo_primary_19888497.png",
+    "newcastle united": "https://content.sportslogos.net/logos/69/3497/full/newcastle_united_logo_primary_19888497.png",
+    "norwich": "https://content.sportslogos.net/logos/69/3498/full/norwich_city_logo_primary_2022_sportslogosnet-8149.png",
+    "norwich city": "https://content.sportslogos.net/logos/69/3498/full/norwich_city_logo_primary_2022_sportslogosnet-8149.png",
+    "nott'm forest": "https://content.sportslogos.net/logos/69/3499/full/nottingham_forest_logo_primary_19747948.png",
+    "nottingham forest": "https://content.sportslogos.net/logos/69/3499/full/nottingham_forest_logo_primary_19747948.png",
+    "sheffield united": "https://content.sportslogos.net/logos/69/3501/full/sheffield_united_logo_primary_19992683.png",
+    "sheffield utd": "https://content.sportslogos.net/logos/69/3501/full/sheffield_united_logo_primary_19992683.png",
+    "southampton": "https://content.sportslogos.net/logos/69/3502/full/southampton_fc_logo_primary_20112423.png",
+    "stoke": "https://content.sportslogos.net/logos/69/3503/full/stoke_city_logo_primary_20015039.png",
+    "stoke city": "https://content.sportslogos.net/logos/69/3503/full/stoke_city_logo_primary_20015039.png",
+    "sunderland": "https://content.sportslogos.net/logos/69/3504/full/sunderland_afc_logo_primary_19973843.png",
+    "swansea": "https://content.sportslogos.net/logos/69/3505/full/swansea_city_logo_primary_2021_sportslogosnet-8089.png",
+    "swansea city": "https://content.sportslogos.net/logos/69/3505/full/swansea_city_logo_primary_2021_sportslogosnet-8089.png",
+    "tottenham": "https://content.sportslogos.net/logos/69/3506/full/tottenham_hotspur_logo_primary_20067645.png",
+    "tottenham hotspur": "https://content.sportslogos.net/logos/69/3506/full/tottenham_hotspur_logo_primary_20067645.png",
+    "watford": "https://content.sportslogos.net/logos/69/3507/full/watford_fc_logo_primary_19782578.png",
+    "west brom": "https://content.sportslogos.net/logos/69/3508/full/west_bromwich_albion_logo_primary_20118536.png",
+    "west bromwich albion": "https://content.sportslogos.net/logos/69/3508/full/west_bromwich_albion_logo_primary_20118536.png",
+    "west ham": "https://content.sportslogos.net/logos/69/3509/full/west_ham_united_logo_primary_20162594.png",
+    "west ham united": "https://content.sportslogos.net/logos/69/3509/full/west_ham_united_logo_primary_20162594.png",
+    "wolves": "https://content.sportslogos.net/logos/69/3510/full/wolverhampton_wanderers_logo_primary_20022416.png",
+    "wolverhampton wanderers": "https://content.sportslogos.net/logos/69/3510/full/wolverhampton_wanderers_logo_primary_20022416.png",
 }
 
 def get_team_logo(team_name: str) -> str:
@@ -102,40 +102,41 @@ div[data-testid="stSelectbox"] label p {
     font-size: 14px !important;
 }
 
-/* 1. Main Dropdown Input Box (Closed State) */
+/* 1. Main Dropdown Input Box - Dark/Black Background */
 div[data-baseweb="select"] > div:first-child {
-    background-color: #ffffff !important;
+    background-color: #1e1e24 !important;
     border-radius: 10px !important;
     border: 1.5px solid #6B1D78 !important;
 }
 
-/* Force all text, icons, and values inside the input box to Dark Purple */
+/* Text and Icons inside Input Box - White */
 div[data-baseweb="select"] * {
-    color: #38003c !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
-    fill: #38003c !important;
+    fill: #ffffff !important;
 }
 
-/* 2. Pop-up Dropdown Options List Container (Open State) */
+/* 2. Pop-up Options List Container - Dark/Black Background */
 div[data-baseweb="popover"],
 div[data-baseweb="menu"],
 ul[role="listbox"] {
-    background-color: #ffffff !important;
+    background-color: #1e1e24 !important;
     border-radius: 10px !important;
+    border: 1px solid #6B1D78 !important;
 }
 
-/* Individual items inside the dropdown list */
+/* Individual options inside list - Dark Background with White Text */
 li[role="option"],
 div[role="option"] {
-    background-color: #ffffff !important;
-    color: #38003c !important;
+    background-color: #1e1e24 !important;
+    color: #ffffff !important;
 }
 
-/* Hover & Active state for items in the list */
+/* Hover & Selected state - Highlighted Purple */
 li[role="option"]:hover,
 li[role="option"][aria-selected="true"] {
-    background-color: #f4e8f7 !important;
-    color: #38003c !important;
+    background-color: #4A0B50 !important;
+    color: #00ff85 !important;
 }
 
 /* Matchup Header Card */
@@ -353,8 +354,6 @@ st.markdown(
 
 # Run Prediction Button & Results Container
 if st.button("RUN PREDICTION", use_container_width=True):
-    # Place your actual model inference logic here
-    # Example placeholder values for output verification:
     prob_home = 48.5
     prob_draw = 26.2
     prob_away = 25.3
