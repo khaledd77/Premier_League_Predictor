@@ -8,12 +8,36 @@ import streamlit as st
 # Set Streamlit Page Title & Configuration
 st.set_page_config(
     page_title="Premier League Match Predictor",
-   
+    page_icon="⚽",
     layout="centered",
 )
 
+# --- OFFICIAL PREMIER LEAGUE TEAM CREST LOGOS ---
+TEAM_LOGOS = {
+    "Arsenal": "https://resources.premierleague.com/premierleague/badges/50/t3.png",
+    "Aston Villa": "https://resources.premierleague.com/premierleague/badges/50/t7.png",
+    "Bournemouth": "https://resources.premierleague.com/premierleague/badges/50/t91.png",
+    "Brentford": "https://resources.premierleague.com/premierleague/badges/50/t94.png",
+    "Brighton": "https://resources.premierleague.com/premierleague/badges/50/t36.png",
+    "Chelsea": "https://resources.premierleague.com/premierleague/badges/50/t8.png",
+    "Crystal Palace": "https://resources.premierleague.com/premierleague/badges/50/t9.png",
+    "Everton": "https://resources.premierleague.com/premierleague/badges/50/t11.png",
+    "Fulham": "https://resources.premierleague.com/premierleague/badges/50/t54.png",
+    "Ipswich": "https://resources.premierleague.com/premierleague/badges/50/t40.png",
+    "Leicester": "https://resources.premierleague.com/premierleague/badges/50/t13.png",
+    "Liverpool": "https://resources.premierleague.com/premierleague/badges/50/t14.png",
+    "Manchester City": "https://resources.premierleague.com/premierleague/badges/50/t43.png",
+    "Manchester United": "https://resources.premierleague.com/premierleague/badges/50/t1.png",
+    "Newcastle United": "https://resources.premierleague.com/premierleague/badges/50/t4.png",
+    "Nottingham Forest": "https://resources.premierleague.com/premierleague/badges/50/t17.png",
+    "Southampton": "https://resources.premierleague.com/premierleague/badges/50/t20.png",
+    "Tottenham": "https://resources.premierleague.com/premierleague/badges/50/t6.png",
+    "West Ham": "https://resources.premierleague.com/premierleague/badges/50/t21.png",
+    "Wolves": "https://resources.premierleague.com/premierleague/badges/50/t39.png"
+}
+DEFAULT_LOGO = "https://resources.premierleague.com/premierleague/badges/50/t-default.png"
+
 # --- FILE PATH RESOLUTION ---
-# Ensures Python finds predictor_artifacts.pkl when app.py is run from the root folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "predictor_artifacts.pkl")
 
@@ -110,20 +134,21 @@ def render_results(home_team, away_team):
     result = predict_match(home_team, away_team)
 
     outcomes = [
-        (home_team, result["home_win"] * 100),
-        ("Draw", result["draw"] * 100),
-        (away_team, result["away_win"] * 100),
+        (home_team, result["home_win"] * 100, TEAM_LOGOS.get(home_team, DEFAULT_LOGO)),
+        ("Draw", result["draw"] * 100, ""),
+        (away_team, result["away_win"] * 100, TEAM_LOGOS.get(away_team, DEFAULT_LOGO)),
     ]
 
     best_label = max(outcomes, key=lambda x: x[1])[0]
 
     rows = ""
-    for label, pct in outcomes:
+    for label, pct, logo_url in outcomes:
         is_best = "highlight" if label == best_label else ""
-        # Stripped newlines and indentation to prevent Streamlit from rendering code blocks
+        img_tag = f'<img src="{logo_url}" width="26" style="vertical-align:middle; margin-right:8px;">' if logo_url else ''
+        
         rows += (
             f'<div class="outcome-row {is_best}">'
-            f'<div class="outcome-label">{label}</div>'
+            f'<div class="outcome-label">{img_tag}{label}</div>'
             f'<div class="bar-track">'
             f'<div class="bar-fill {is_best}" style="width:{pct:.1f}%;"></div>'
             f'</div>'
@@ -139,8 +164,8 @@ def render_results(home_team, away_team):
     )
 
 
-# --- CUSTOM CSS STYLING ---
 # --- OFFICIAL PREMIER LEAGUE CSS STYLING ---
+# --- LIGHTER PREMIER LEAGUE PURPLE CSS STYLING ---
 css = """
 <style>
 /* Main Title & Subtitle */
@@ -148,7 +173,7 @@ css = """
     text-align: center;
     font-size: 42px;
     font-weight: 800;
-    color: #38003c;
+    color: #6B1D78;
     letter-spacing: -0.5px;
 }
 
@@ -163,10 +188,10 @@ css = """
 .result-box {
     margin-top: 25px;
     padding: 30px;
-    border: 2px solid #38003c;
+    border: 2px solid #6B1D78;
     border-radius: 16px;
-    background: #fbf7fc;
-    box-shadow: 0 4px 12px rgba(56, 0, 60, 0.08);
+    background: #FAEFFC;
+    box-shadow: 0 4px 12px rgba(107, 29, 120, 0.08);
 }
 
 .placeholder {
@@ -175,7 +200,7 @@ css = """
     text-align: center;
     font-size: 18px;
     color: #777;
-    border: 2px dashed #38003c;
+    border: 2px dashed #6B1D78;
     border-radius: 16px;
     background: #fafafa;
 }
@@ -183,7 +208,7 @@ css = """
 .favored-tag {
     text-align: center;
     font-size: 20px;
-    color: #38003c;
+    color: #6B1D78;
     margin-bottom: 25px;
     font-weight: 600;
 }
@@ -191,7 +216,7 @@ css = """
 .favored-tag strong {
     color: #38003c;
     background: #00ff85;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 6px;
 }
 
@@ -204,24 +229,27 @@ css = """
 }
 
 .outcome-label {
-    min-width: 140px;
+    min-width: 160px;
     font-size: 18px;
     font-weight: 700;
-    color: #38003c;
+    color: #6B1D78;
     text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .bar-track {
     flex: 1;
     height: 28px;
-    background: #e8dbed;
+    background: #EED7F2;
     border-radius: 14px;
     overflow: hidden;
 }
 
 .bar-fill {
     height: 100%;
-    background: #9b72a4;
+    background: #B484BC;
     border-radius: 14px;
     transition: width 0.5s ease;
 }
@@ -232,24 +260,24 @@ css = """
 }
 
 .outcome-row.highlight .outcome-label {
-    color: #38003c;
+    color: #6B1D78;
 }
 
 .outcome-pct {
     min-width: 65px;
     font-size: 18px;
     font-weight: 700;
-    color: #38003c;
+    color: #6B1D78;
 }
 
 .outcome-row.highlight .outcome-pct {
-    color: #38003c;
+    color: #6B1D78;
     font-size: 20px;
 }
 
-/* Streamlit Button Styling Override */
+/* Streamlit Button Override */
 div.stButton > button:first-child {
-    background-color: #38003c !important;
+    background-color: #6B1D78 !important;
     color: #00ff85 !important;
     border: none !important;
     font-size: 20px !important;
@@ -259,9 +287,9 @@ div.stButton > button:first-child {
 }
 
 div.stButton > button:first-child:hover {
-    background-color: #250028 !important;
+    background-color: #52145D !important;
     color: #00ff85 !important;
-    box-shadow: 0 4px 10px rgba(56, 0, 60, 0.3);
+    box-shadow: 0 4px 10px rgba(107, 29, 120, 0.3);
 }
 </style>
 """
@@ -269,18 +297,20 @@ div.stButton > button:first-child:hover {
 st.markdown(css, unsafe_allow_html=True)
 
 # --- STREAMLIT USER INTERFACE ---
-st.markdown("<h1 id='title'>⚽ Premier League Match Predictor</h1>", unsafe_allow_html=True)
+st.markdown("<h1 id='title'>Premier League Match Predictor</h1>", unsafe_allow_html=True)
 st.markdown("<p id='subtitle'>Predict the outcome of a Premier League match using Machine Learning</p>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
     home_team = st.selectbox("HOME TEAM", options=teams, index=teams.index("Chelsea") if "Chelsea" in teams else 0)
+    st.image(TEAM_LOGOS.get(home_team, DEFAULT_LOGO), width=50)
 
 with col2:
     away_team = st.selectbox("AWAY TEAM", options=teams, index=teams.index("Fulham") if "Fulham" in teams else 0)
+    st.image(TEAM_LOGOS.get(away_team, DEFAULT_LOGO), width=50)
 
-predict_clicked = st.button("⚽ PREDICT MATCH", type="primary", use_container_width=True)
+predict_clicked = st.button("PREDICT MATCH", type="primary", use_container_width=True)
 
 if predict_clicked:
     html_output = render_results(home_team, away_team)
