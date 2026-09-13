@@ -169,11 +169,12 @@ def render_results(home_team, away_team):
 
 # --- INTUITIVE & MODERN CSS STYLING ---
 # --- LIGHT PURPLE BACKGROUND & UI STYLING ---
+# --- CLASSIC PREMIER LEAGUE PURPLE WITH NEON GREEN BUTTON STYLING ---
 css = """
 <style>
-/* Main App Background */
+/* Subtle Background */
 .stApp {
-    background-color: #F4E8F7 !important;
+    background-color: #f7f3f8 !important;
 }
 
 /* Header Styling */
@@ -181,14 +182,14 @@ css = """
     text-align: center;
     font-size: 38px;
     font-weight: 800;
-    color: #4A1252;
+    color: #38003c;
     margin-bottom: 0px;
 }
 
 #subtitle {
     text-align: center;
     font-size: 16px;
-    color: #6A3A73;
+    color: #555;
     margin-bottom: 25px;
 }
 
@@ -197,45 +198,45 @@ css = """
     display: flex;
     align-items: center;
     justify-content: space-around;
-    background: #FFFFFF;
-    border: 2px solid #822C8E;
+    background: #ffffff;
+    border: 2px solid #38003c;
     border-radius: 16px;
     padding: 15px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(74, 18, 82, 0.08);
+    box-shadow: 0 4px 12px rgba(56, 0, 60, 0.08);
 }
 
 .vs-team {
     text-align: center;
     font-weight: 700;
-    color: #4A1252;
+    color: #38003c;
     font-size: 16px;
 }
 
 .vs-badge {
-    background: #6B1D78;
+    background: #38003c;
     color: #00ff85;
     font-weight: 900;
     font-size: 18px;
     padding: 8px 16px;
     border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(107, 29, 120, 0.2);
+    box-shadow: 0 2px 8px rgba(56, 0, 60, 0.2);
 }
 
 /* Prediction Output Box */
 .result-wrapper {
     margin-top: 20px;
     padding: 20px;
-    background: #FFFFFF;
+    background: #ffffff;
     border-radius: 16px;
-    border: 2px solid #822C8E;
-    box-shadow: 0 4px 15px rgba(74, 18, 82, 0.1);
+    border: 2px solid #38003c;
+    box-shadow: 0 4px 15px rgba(56, 0, 60, 0.08);
 }
 
 .prediction-header {
     text-align: center;
     font-size: 20px;
-    color: #4A1252;
+    color: #38003c;
     margin-bottom: 20px;
 }
 
@@ -254,8 +255,8 @@ css = """
 
 .prob-card {
     position: relative;
-    background: #FAF3FC;
-    border: 2px solid #E2C7E8;
+    background: #fbf7fc;
+    border: 1.5px solid #e0d0e3;
     border-radius: 12px;
     padding: 15px 10px;
     text-align: center;
@@ -267,9 +268,9 @@ css = """
 }
 
 .prob-card.highlight-card {
-    border-color: #822C8E;
-    background: #F3DCF7;
-    box-shadow: 0 4px 12px rgba(130, 44, 142, 0.15);
+    border-color: #38003c;
+    background: #f4e8f7;
+    box-shadow: 0 4px 12px rgba(56, 0, 60, 0.12);
 }
 
 .favored-badge {
@@ -277,7 +278,7 @@ css = """
     top: -10px;
     left: 50%;
     transform: translateX(-50%);
-    background: #6B1D78;
+    background: #38003c;
     color: #00ff85;
     font-size: 10px;
     font-weight: 800;
@@ -289,7 +290,7 @@ css = """
 .card-title {
     font-size: 16px;
     font-weight: 700;
-    color: #4A1252;
+    color: #38003c;
     margin-top: 5px;
 }
 
@@ -309,14 +310,14 @@ css = """
 .mini-bar-track {
     width: 100%;
     height: 8px;
-    background: #E2C7E8;
+    background: #e8dbed;
     border-radius: 4px;
     overflow: hidden;
 }
 
 .mini-bar-fill {
     height: 100%;
-    background: #AC71B8;
+    background: #9b72a4;
     border-radius: 4px;
 }
 
@@ -329,16 +330,16 @@ css = """
     padding: 25px;
     text-align: center;
     font-size: 16px;
-    color: #5A2A63;
-    border: 2px dashed #822C8E;
+    color: #38003c;
+    border: 2px dashed #38003c;
     border-radius: 14px;
-    background: #FFFFFF;
+    background: #ffffff;
 }
 
-/* Streamlit Button Override */
+/* Green Button Styling */
 div.stButton > button:first-child {
-    background-color: #6B1D78 !important;
-    color: #00ff85 !important;
+    background-color: #00ff85 !important;
+    color: #38003c !important;
     border: none !important;
     font-size: 18px !important;
     font-weight: bold !important;
@@ -347,9 +348,9 @@ div.stButton > button:first-child {
 }
 
 div.stButton > button:first-child:hover {
-    background-color: #4A1252 !important;
-    color: #00ff85 !important;
-    box-shadow: 0 4px 12px rgba(107, 29, 120, 0.3);
+    background-color: #00e676 !important;
+    color: #250028 !important;
+    box-shadow: 0 4px 12px rgba(0, 255, 133, 0.4);
 }
 
 @media (max-width: 600px) {
