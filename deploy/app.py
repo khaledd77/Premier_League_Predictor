@@ -8,7 +8,7 @@ import streamlit as st
 # Set Streamlit Page Title & Configuration
 st.set_page_config(
     page_title="Premier League Match Predictor",
-    page_icon="⚽",
+   
     layout="centered",
 )
 
