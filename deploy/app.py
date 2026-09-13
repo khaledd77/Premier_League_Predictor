@@ -170,27 +170,36 @@ def render_results(home_team, away_team):
 # --- INTUITIVE & MODERN CSS STYLING ---
 # --- LIGHT PURPLE BACKGROUND & UI STYLING ---
 # --- CLASSIC PREMIER LEAGUE PURPLE WITH NEON GREEN BUTTON STYLING ---
+# --- DARK PREMIER LEAGUE PURPLE BACKGROUND & WHITE TEXT CSS ---
 css = """
 <style>
-/* Subtle Background */
+/* Dark Premier League Purple Background */
 .stApp {
-    background-color: #f7f3f8 !important;
+    background-color: #38003c !important;
 }
 
-/* Header Styling */
+/* White Header Styling */
 #title {
     text-align: center;
     font-size: 38px;
     font-weight: 800;
-    color: #38003c;
+    color: #FFFFFF !important;
     margin-bottom: 0px;
 }
 
 #subtitle {
     text-align: center;
     font-size: 16px;
-    color: #555;
+    color: #E8DBED !important;
     margin-bottom: 25px;
+    opacity: 0.9;
+}
+
+/* Dropdown Labels (HOME TEAM / AWAY TEAM) in White */
+div[data-testid="stSelectbox"] label p {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
 }
 
 /* Matchup Header Card */
@@ -198,50 +207,50 @@ css = """
     display: flex;
     align-items: center;
     justify-content: space-around;
-    background: #ffffff;
-    border: 2px solid #38003c;
+    background: #4A0B50;
+    border: 2px solid #6B1D78;
     border-radius: 16px;
     padding: 15px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(56, 0, 60, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .vs-team {
     text-align: center;
     font-weight: 700;
-    color: #38003c;
+    color: #FFFFFF !important;
     font-size: 16px;
 }
 
 .vs-badge {
-    background: #38003c;
-    color: #00ff85;
+    background: #00ff85;
+    color: #38003c;
     font-weight: 900;
     font-size: 18px;
     padding: 8px 16px;
     border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(56, 0, 60, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 255, 133, 0.3);
 }
 
 /* Prediction Output Box */
 .result-wrapper {
     margin-top: 20px;
     padding: 20px;
-    background: #ffffff;
+    background: #4A0B50;
     border-radius: 16px;
-    border: 2px solid #38003c;
-    box-shadow: 0 4px 15px rgba(56, 0, 60, 0.08);
+    border: 2px solid #6B1D78;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .prediction-header {
     text-align: center;
     font-size: 20px;
-    color: #38003c;
+    color: #FFFFFF !important;
     margin-bottom: 20px;
 }
 
 .prediction-header strong {
-    color: #38003c;
+    color: #38003c !important;
     background: #00ff85;
     padding: 3px 10px;
     border-radius: 6px;
@@ -255,8 +264,8 @@ css = """
 
 .prob-card {
     position: relative;
-    background: #fbf7fc;
-    border: 1.5px solid #e0d0e3;
+    background: #38003c;
+    border: 1.5px solid #6B1D78;
     border-radius: 12px;
     padding: 15px 10px;
     text-align: center;
@@ -268,9 +277,9 @@ css = """
 }
 
 .prob-card.highlight-card {
-    border-color: #38003c;
-    background: #f4e8f7;
-    box-shadow: 0 4px 12px rgba(56, 0, 60, 0.12);
+    border-color: #00ff85;
+    background: #500C57;
+    box-shadow: 0 4px 12px rgba(0, 255, 133, 0.2);
 }
 
 .favored-badge {
@@ -278,8 +287,8 @@ css = """
     top: -10px;
     left: 50%;
     transform: translateX(-50%);
-    background: #38003c;
-    color: #00ff85;
+    background: #00ff85;
+    color: #38003c;
     font-size: 10px;
     font-weight: 800;
     padding: 2px 8px;
@@ -290,34 +299,34 @@ css = """
 .card-title {
     font-size: 16px;
     font-weight: 700;
-    color: #38003c;
+    color: #FFFFFF !important;
     margin-top: 5px;
 }
 
 .card-subtitle {
     font-size: 12px;
-    color: #666;
+    color: #E8DBED !important;
     margin-bottom: 8px;
 }
 
 .card-pct {
     font-size: 24px;
     font-weight: 800;
-    color: #38003c;
+    color: #00ff85 !important;
     margin-bottom: 10px;
 }
 
 .mini-bar-track {
     width: 100%;
     height: 8px;
-    background: #e8dbed;
+    background: #250028;
     border-radius: 4px;
     overflow: hidden;
 }
 
 .mini-bar-fill {
     height: 100%;
-    background: #9b72a4;
+    background: #8A409A;
     border-radius: 4px;
 }
 
@@ -330,13 +339,13 @@ css = """
     padding: 25px;
     text-align: center;
     font-size: 16px;
-    color: #38003c;
-    border: 2px dashed #38003c;
+    color: #FFFFFF !important;
+    border: 2px dashed #6B1D78;
     border-radius: 14px;
-    background: #ffffff;
+    background: #4A0B50;
 }
 
-/* Green Button Styling */
+/* Neon Green Action Button */
 div.stButton > button:first-child {
     background-color: #00ff85 !important;
     color: #38003c !important;
@@ -350,7 +359,7 @@ div.stButton > button:first-child {
 div.stButton > button:first-child:hover {
     background-color: #00e676 !important;
     color: #250028 !important;
-    box-shadow: 0 4px 12px rgba(0, 255, 133, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 255, 133, 0.4);
 }
 
 @media (max-width: 600px) {
