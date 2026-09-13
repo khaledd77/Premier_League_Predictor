@@ -1,10 +1,18 @@
+import os
 import pickle
 from collections import defaultdict, deque
 
 import pandas as pd
-import gradio as gr
+import streamlit as st
 
-with open("predictor_artifacts.pkl", "rb") as f:
+# Set Streamlit Page Title & Configuration
+st.set_page_config(page_title="Premier League Match Predictor", page_icon="⚽", layout="centered")
+
+# --- FILE PATH RESOLUTION ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "predictor_artifacts.pkl")
+
+with open(MODEL_PATH, "rb") as f:
     artifacts = pickle.load(f)
 
 model = artifacts["model"]
@@ -24,19 +32,15 @@ h2h.update(artifacts["h2h"])
 
 
 def predict_match(home_team, away_team):
-
     home_avg_scored = sum(team_stats[home_team]["goals_scored"]) / len(
         team_stats[home_team]["goals_scored"]
     )
-
     home_avg_conceded = sum(team_stats[home_team]["goals_conceded"]) / len(
         team_stats[home_team]["goals_conceded"]
     )
-
     away_avg_scored = sum(team_stats[away_team]["goals_scored"]) / len(
         team_stats[away_team]["goals_scored"]
     )
-
     away_avg_conceded = sum(team_stats[away_team]["goals_conceded"]) / len(
         team_stats[away_team]["goals_conceded"]
     )
@@ -57,44 +61,43 @@ def predict_match(home_team, away_team):
     h2h_away_wins = 0
 
     if (home_team, away_team) in h2h:
-
         h2h_home_wins = h2h[(home_team, away_team)]["home_wins"]
         h2h_draws = h2h[(home_team, away_team)]["draws"]
         h2h_away_wins = h2h[(home_team, away_team)]["away_wins"]
-
     elif (away_team, home_team) in h2h:
-
         h2h_home_wins = h2h[(away_team, home_team)]["away_wins"]
         h2h_draws = h2h[(away_team, home_team)]["draws"]
         h2h_away_wins = h2h[(away_team, home_team)]["home_wins"]
 
-    X = pd.DataFrame([[
-        home_avg_scored,
-        home_avg_conceded,
-        home_wins,
-        home_draws,
-        home_losses,
-        away_avg_scored,
-        away_avg_conceded,
-        away_wins,
-        away_draws,
-        away_losses,
-        h2h_home_wins,
-        h2h_draws,
-        h2h_away_wins
-    ]], columns=features)
+    X = pd.DataFrame(
+        [[
+            home_avg_scored,
+            home_avg_conceded,
+            home_wins,
+            home_draws,
+            home_losses,
+            away_avg_scored,
+            away_avg_conceded,
+            away_wins,
+            away_draws,
+            away_losses,
+            h2h_home_wins,
+            h2h_draws,
+            h2h_away_wins,
+        ]],
+        columns=features,
+    )
 
     probabilities = model.predict_proba(X)[0]
 
     return {
         "home_win": probabilities[2],
         "draw": probabilities[1],
-        "away_win": probabilities[0]
+        "away_win": probabilities[0],
     }
 
 
-def predict_for_gui(home_team, away_team):
-
+def render_results(home_team, away_team):
     if home_team == away_team:
         return "<div class='placeholder'>Please select two different teams.</div>"
 
@@ -129,11 +132,9 @@ def predict_for_gui(home_team, away_team):
     """
 
 
+# --- CUSTOM CSS STYLING ---
 css = """
-body {
-    background: white;
-}
-
+<style>
 #title {
     text-align: center;
     font-size: 42px;
@@ -145,18 +146,7 @@ body {
     text-align: center;
     font-size: 20px;
     color: #555;
-}
-
-.team-dropdown {
-    font-size: 20px !important;
-}
-
-#predict-button {
-    font-size: 24px !important;
-    font-weight: bold;
-    height: 65px;
-    background: #1565c0 !important;
-    color: white !important;
+    margin-bottom: 30px;
 }
 
 .result-box {
@@ -236,93 +226,27 @@ body {
     color: #0d47a1;
     font-size: 20px;
 }
-
-@media (max-width: 600px) {
-
-    #title {
-        font-size: 28px;
-        line-height: 1.2;
-    }
-
-    #subtitle {
-        font-size: 15px;
-        line-height: 1.4;
-        padding: 0 10px;
-    }
-
-    .team-dropdown {
-        font-size: 16px !important;
-    }
-
-    #predict-button {
-        font-size: 19px !important;
-        height: 55px;
-    }
-
-    .result-box {
-        padding: 20px;
-    }
-
-    .outcome-label {
-        min-width: 90px;
-        font-size: 14px;
-    }
-
-    .outcome-pct {
-        min-width: 45px;
-        font-size: 14px;
-    }
-
-    .bar-track {
-        height: 22px;
-    }
-}
+</style>
 """
 
+st.markdown(css, unsafe_allow_html=True)
 
-with gr.Blocks(title="Premier League Match Predictor") as demo:
+# --- STREAMLIT USER INTERFACE ---
+st.markdown("<h1 id='title'>⚽ Premier League Match Predictor</h1>", unsafe_allow_html=True)
+st.markdown("<p id='subtitle'>Predict the outcome of a Premier League match using Machine Learning</p>", unsafe_allow_html=True)
 
-    gr.Markdown(
-        "# ⚽ Premier League Match Predictor",
-        elem_id="title"
-    )
+col1, col2 = st.columns(2)
 
-    gr.Markdown(
-        "Predict the outcome of a Premier League match using Machine Learning",
-        elem_id="subtitle"
-    )
+with col1:
+    home_team = st.selectbox("HOME TEAM", options=teams, index=teams.index("Chelsea") if "Chelsea" in teams else 0)
 
-    with gr.Row():
+with col2:
+    away_team = st.selectbox("AWAY TEAM", options=teams, index=teams.index("Fulham") if "Fulham" in teams else 0)
 
-        home_team = gr.Dropdown(
-            choices=teams,
-            label="HOME TEAM",
-            value="Chelsea",
-            elem_classes="team-dropdown"
-        )
+predict_clicked = st.button("⚽ PREDICT MATCH", type="primary", use_container_width=True)
 
-        away_team = gr.Dropdown(
-            choices=teams,
-            label="AWAY TEAM",
-            value="Fulham",
-            elem_classes="team-dropdown"
-        )
-
-    predict_button = gr.Button(
-        "⚽ PREDICT MATCH",
-        variant="primary",
-        elem_id="predict-button"
-    )
-
-    prediction = gr.HTML(
-        value="<div class='placeholder'>Select two teams and click Predict to see the odds.</div>"
-    )
-
-    predict_button.click(
-        fn=predict_for_gui,
-        inputs=[home_team, away_team],
-        outputs=prediction
-    )
-
-
-demo.launch()
+if predict_clicked:
+    html_output = render_results(home_team, away_team)
+    st.markdown(html_output, unsafe_allow_html=True)
+else:
+    st.markdown("<div class='placeholder'>Select two teams and click Predict to see the odds.</div>", unsafe_allow_html=True)
