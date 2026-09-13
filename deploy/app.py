@@ -140,28 +140,33 @@ def render_results(home_team, away_team):
 
 
 # --- CUSTOM CSS STYLING ---
+# --- OFFICIAL PREMIER LEAGUE CSS STYLING ---
 css = """
 <style>
+/* Main Title & Subtitle */
 #title {
     text-align: center;
     font-size: 42px;
-    font-weight: bold;
-    color: #1565c0;
+    font-weight: 800;
+    color: #38003c;
+    letter-spacing: -0.5px;
 }
 
 #subtitle {
     text-align: center;
-    font-size: 20px;
-    color: #555;
+    font-size: 18px;
+    color: #666;
     margin-bottom: 30px;
 }
 
+/* Prediction Result Card */
 .result-box {
     margin-top: 25px;
     padding: 30px;
-    border: 2px solid #1565c0;
-    border-radius: 15px;
-    background: #f5f9ff;
+    border: 2px solid #38003c;
+    border-radius: 16px;
+    background: #fbf7fc;
+    box-shadow: 0 4px 12px rgba(56, 0, 60, 0.08);
 }
 
 .placeholder {
@@ -169,22 +174,28 @@ css = """
     padding: 30px;
     text-align: center;
     font-size: 18px;
-    color: #888;
-    border: 2px dashed #ccc;
-    border-radius: 15px;
+    color: #777;
+    border: 2px dashed #38003c;
+    border-radius: 16px;
+    background: #fafafa;
 }
 
 .favored-tag {
     text-align: center;
     font-size: 20px;
-    color: #555;
+    color: #38003c;
     margin-bottom: 25px;
+    font-weight: 600;
 }
 
 .favored-tag strong {
-    color: #0d47a1;
+    color: #38003c;
+    background: #00ff85;
+    padding: 3px 10px;
+    border-radius: 6px;
 }
 
+/* Progress Bars & Rows */
 .outcome-row {
     display: flex;
     align-items: center;
@@ -195,43 +206,62 @@ css = """
 .outcome-label {
     min-width: 140px;
     font-size: 18px;
-    font-weight: bold;
-    color: #1565c0;
+    font-weight: 700;
+    color: #38003c;
     text-align: right;
 }
 
 .bar-track {
     flex: 1;
     height: 28px;
-    background: #e3ecf7;
+    background: #e8dbed;
     border-radius: 14px;
     overflow: hidden;
 }
 
 .bar-fill {
     height: 100%;
-    background: #90a4c4;
+    background: #9b72a4;
     border-radius: 14px;
+    transition: width 0.5s ease;
 }
 
+/* Winning / Most Likely Bar Highlight */
 .bar-fill.highlight {
-    background: #1565c0;
+    background: #00ff85;
 }
 
 .outcome-row.highlight .outcome-label {
-    color: #0d47a1;
+    color: #38003c;
 }
 
 .outcome-pct {
-    min-width: 60px;
+    min-width: 65px;
     font-size: 18px;
-    font-weight: bold;
-    color: #333;
+    font-weight: 700;
+    color: #38003c;
 }
 
 .outcome-row.highlight .outcome-pct {
-    color: #0d47a1;
+    color: #38003c;
     font-size: 20px;
+}
+
+/* Streamlit Button Styling Override */
+div.stButton > button:first-child {
+    background-color: #38003c !important;
+    color: #00ff85 !important;
+    border: none !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    border-radius: 10px !important;
+    padding: 12px 0px !important;
+}
+
+div.stButton > button:first-child:hover {
+    background-color: #250028 !important;
+    color: #00ff85 !important;
+    box-shadow: 0 4px 10px rgba(56, 0, 60, 0.3);
 }
 </style>
 """
