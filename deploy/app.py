@@ -6,9 +6,14 @@ import pandas as pd
 import streamlit as st
 
 # Set Streamlit Page Title & Configuration
-st.set_page_config(page_title="Premier League Match Predictor", page_icon="⚽", layout="centered")
+st.set_page_config(
+    page_title="Premier League Match Predictor",
+    page_icon="⚽",
+    layout="centered",
+)
 
 # --- FILE PATH RESOLUTION ---
+# Ensures Python finds predictor_artifacts.pkl when app.py is run from the root folder
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "predictor_artifacts.pkl")
 
@@ -38,6 +43,7 @@ def predict_match(home_team, away_team):
     home_avg_conceded = sum(team_stats[home_team]["goals_conceded"]) / len(
         team_stats[home_team]["goals_conceded"]
     )
+
     away_avg_scored = sum(team_stats[away_team]["goals_scored"]) / len(
         team_stats[away_team]["goals_scored"]
     )
@@ -114,22 +120,23 @@ def render_results(home_team, away_team):
     rows = ""
     for label, pct in outcomes:
         is_best = "highlight" if label == best_label else ""
-        rows += f"""
-        <div class="outcome-row {is_best}">
-            <div class="outcome-label">{label}</div>
-            <div class="bar-track">
-                <div class="bar-fill {is_best}" style="width:{pct:.1f}%;"></div>
-            </div>
-            <div class="outcome-pct">{pct:.1f}%</div>
-        </div>
-        """
+        # Stripped newlines and indentation to prevent Streamlit from rendering code blocks
+        rows += (
+            f'<div class="outcome-row {is_best}">'
+            f'<div class="outcome-label">{label}</div>'
+            f'<div class="bar-track">'
+            f'<div class="bar-fill {is_best}" style="width:{pct:.1f}%;"></div>'
+            f'</div>'
+            f'<div class="outcome-pct">{pct:.1f}%</div>'
+            f'</div>'
+        )
 
-    return f"""
-    <div class='result-box'>
-        <div class='favored-tag'>Most Likely: <strong>{best_label}</strong></div>
-        {rows}
-    </div>
-    """
+    return (
+        f'<div class="result-box">'
+        f'<div class="favored-tag">Most Likely: <strong>{best_label}</strong></div>'
+        f'{rows}'
+        f'</div>'
+    )
 
 
 # --- CUSTOM CSS STYLING ---
@@ -247,6 +254,6 @@ predict_clicked = st.button("⚽ PREDICT MATCH", type="primary", use_container_w
 
 if predict_clicked:
     html_output = render_results(home_team, away_team)
-    st.markdown(html_output, unsafe_allow_html=True)
+    st.html(html_output)
 else:
-    st.markdown("<div class='placeholder'>Select two teams and click Predict to see the odds.</div>", unsafe_allow_html=True)
+    st.html("<div class='placeholder'>Select two teams and click Predict to see the odds.</div>")
