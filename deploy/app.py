@@ -171,6 +171,7 @@ def render_results(home_team, away_team):
 # --- LIGHT PURPLE BACKGROUND & UI STYLING ---
 # --- CLASSIC PREMIER LEAGUE PURPLE WITH NEON GREEN BUTTON STYLING ---
 # --- DARK PREMIER LEAGUE PURPLE BACKGROUND & WHITE TEXT CSS ---
+# --- DARK PURPLE BACKGROUND WITH WHITE DROPDOWNS & NEON GREEN BUTTON ---
 css = """
 <style>
 /* Dark Premier League Purple Background */
@@ -200,6 +201,20 @@ div[data-testid="stSelectbox"] label p {
     color: #FFFFFF !important;
     font-weight: 700 !important;
     font-size: 14px !important;
+}
+
+/* Style the Select Box inputs to be White */
+div[data-baseweb="select"] > div {
+    background-color: #ffffff !important;
+    color: #38003c !important;
+    border-radius: 10px !important;
+    border: 1.5px solid #6B1D78 !important;
+}
+
+/* Ensure selected option text is dark purple */
+div[data-baseweb="select"] * {
+    color: #38003c !important;
+    font-weight: 600 !important;
 }
 
 /* Matchup Header Card */
