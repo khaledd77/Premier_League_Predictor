@@ -168,40 +168,47 @@ def render_results(home_team, away_team):
 
 
 # --- INTUITIVE & MODERN CSS STYLING ---
+# --- LIGHT PURPLE BACKGROUND & UI STYLING ---
 css = """
 <style>
+/* Main App Background */
+.stApp {
+    background-color: #F4E8F7 !important;
+}
+
 /* Header Styling */
 #title {
     text-align: center;
     font-size: 38px;
     font-weight: 800;
-    color: #6B1D78;
+    color: #4A1252;
     margin-bottom: 0px;
 }
 
 #subtitle {
     text-align: center;
     font-size: 16px;
-    color: #555;
+    color: #6A3A73;
     margin-bottom: 25px;
 }
 
-/* Matchup Card Header */
+/* Matchup Header Card */
 .vs-banner {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    background: linear-gradient(135deg, #ffffff 0%, #faeffc 100%);
-    border: 2px solid #6B1D78;
+    background: #FFFFFF;
+    border: 2px solid #822C8E;
     border-radius: 16px;
     padding: 15px;
     margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(74, 18, 82, 0.08);
 }
 
 .vs-team {
     text-align: center;
     font-weight: 700;
-    color: #6B1D78;
+    color: #4A1252;
     font-size: 16px;
 }
 
@@ -215,20 +222,20 @@ css = """
     box-shadow: 0 2px 8px rgba(107, 29, 120, 0.2);
 }
 
-/* Prediction Output Grid */
+/* Prediction Output Box */
 .result-wrapper {
     margin-top: 20px;
     padding: 20px;
-    background: #ffffff;
+    background: #FFFFFF;
     border-radius: 16px;
-    border: 1px solid #e0d0e3;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    border: 2px solid #822C8E;
+    box-shadow: 0 4px 15px rgba(74, 18, 82, 0.1);
 }
 
 .prediction-header {
     text-align: center;
     font-size: 20px;
-    color: #6B1D78;
+    color: #4A1252;
     margin-bottom: 20px;
 }
 
@@ -247,8 +254,8 @@ css = """
 
 .prob-card {
     position: relative;
-    background: #fdfafd;
-    border: 2px solid #eed7f2;
+    background: #FAF3FC;
+    border: 2px solid #E2C7E8;
     border-radius: 12px;
     padding: 15px 10px;
     text-align: center;
@@ -260,9 +267,9 @@ css = """
 }
 
 .prob-card.highlight-card {
-    border-color: #6B1D78;
-    background: #faeffc;
-    box-shadow: 0 4px 12px rgba(107, 29, 120, 0.12);
+    border-color: #822C8E;
+    background: #F3DCF7;
+    box-shadow: 0 4px 12px rgba(130, 44, 142, 0.15);
 }
 
 .favored-badge {
@@ -282,13 +289,13 @@ css = """
 .card-title {
     font-size: 16px;
     font-weight: 700;
-    color: #6B1D78;
+    color: #4A1252;
     margin-top: 5px;
 }
 
 .card-subtitle {
     font-size: 12px;
-    color: #777;
+    color: #666;
     margin-bottom: 8px;
 }
 
@@ -302,14 +309,14 @@ css = """
 .mini-bar-track {
     width: 100%;
     height: 8px;
-    background: #eed7f2;
+    background: #E2C7E8;
     border-radius: 4px;
     overflow: hidden;
 }
 
 .mini-bar-fill {
     height: 100%;
-    background: #b484bc;
+    background: #AC71B8;
     border-radius: 4px;
 }
 
@@ -322,13 +329,13 @@ css = """
     padding: 25px;
     text-align: center;
     font-size: 16px;
-    color: #777;
-    border: 2px dashed #b484bc;
+    color: #5A2A63;
+    border: 2px dashed #822C8E;
     border-radius: 14px;
-    background: #fafafa;
+    background: #FFFFFF;
 }
 
-/* Streamlit Button Styling */
+/* Streamlit Button Override */
 div.stButton > button:first-child {
     background-color: #6B1D78 !important;
     color: #00ff85 !important;
@@ -340,7 +347,7 @@ div.stButton > button:first-child {
 }
 
 div.stButton > button:first-child:hover {
-    background-color: #52145D !important;
+    background-color: #4A1252 !important;
     color: #00ff85 !important;
     box-shadow: 0 4px 12px rgba(107, 29, 120, 0.3);
 }
