@@ -172,6 +172,7 @@ def render_results(home_team, away_team):
 # --- CLASSIC PREMIER LEAGUE PURPLE WITH NEON GREEN BUTTON STYLING ---
 # --- DARK PREMIER LEAGUE PURPLE BACKGROUND & WHITE TEXT CSS ---
 # --- DARK PURPLE BACKGROUND WITH WHITE DROPDOWNS & NEON GREEN BUTTON ---
+# --- PREMIER LEAGUE PURPLE WITH FULL WHITE DROPDOWNS & NEON GREEN BUTTON ---
 css = """
 <style>
 /* Dark Premier League Purple Background */
@@ -203,18 +204,40 @@ div[data-testid="stSelectbox"] label p {
     font-size: 14px !important;
 }
 
-/* Style the Select Box inputs to be White */
-div[data-baseweb="select"] > div {
+/* 1. Main Dropdown Input Box (Closed State) */
+div[data-baseweb="select"] > div:first-child {
     background-color: #ffffff !important;
-    color: #38003c !important;
     border-radius: 10px !important;
     border: 1.5px solid #6B1D78 !important;
 }
 
-/* Ensure selected option text is dark purple */
+/* Force all text, icons, and values inside the input box to Dark Purple */
 div[data-baseweb="select"] * {
     color: #38003c !important;
     font-weight: 600 !important;
+    fill: #38003c !important;
+}
+
+/* 2. Pop-up Dropdown Options List Container (Open State) */
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+ul[role="listbox"] {
+    background-color: #ffffff !important;
+    border-radius: 10px !important;
+}
+
+/* Individual items inside the dropdown list */
+li[role="option"],
+div[role="option"] {
+    background-color: #ffffff !important;
+    color: #38003c !important;
+}
+
+/* Hover & Active state for items in the list */
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #f4e8f7 !important;
+    color: #38003c !important;
 }
 
 /* Matchup Header Card */
