@@ -129,158 +129,211 @@ def predict_match(home_team, away_team):
 
 def render_results(home_team, away_team):
     if home_team == away_team:
-        return "<div class='placeholder'>Please select two different teams.</div>"
+        return "<div class='placeholder'>⚠️ Please select two different teams to run a match prediction.</div>"
 
     result = predict_match(home_team, away_team)
 
     outcomes = [
-        (home_team, result["home_win"] * 100, TEAM_LOGOS.get(home_team, DEFAULT_LOGO)),
-        ("Draw", result["draw"] * 100, ""),
-        (away_team, result["away_win"] * 100, TEAM_LOGOS.get(away_team, DEFAULT_LOGO)),
+        (home_team, result["home_win"] * 100, TEAM_LOGOS.get(home_team, DEFAULT_LOGO), "Home Win"),
+        ("Draw", result["draw"] * 100, "", "Draw"),
+        (away_team, result["away_win"] * 100, TEAM_LOGOS.get(away_team, DEFAULT_LOGO), "Away Win"),
     ]
 
-    best_label = max(outcomes, key=lambda x: x[1])[0]
+    best_outcome = max(outcomes, key=lambda x: x[1])
+    best_label = best_outcome[0]
 
-    rows = ""
-    for label, pct, logo_url in outcomes:
-        is_best = "highlight" if label == best_label else ""
-        img_tag = f'<img src="{logo_url}" width="26" style="vertical-align:middle; margin-right:8px;">' if logo_url else ''
-        
-        rows += (
-            f'<div class="outcome-row {is_best}">'
-            f'<div class="outcome-label">{img_tag}{label}</div>'
-            f'<div class="bar-track">'
-            f'<div class="bar-fill {is_best}" style="width:{pct:.1f}%;"></div>'
-            f'</div>'
-            f'<div class="outcome-pct">{pct:.1f}%</div>'
+    cards_html = ""
+    for label, pct, logo_url, subtitle in outcomes:
+        is_best = "highlight-card" if label == best_label else ""
+        badge_tag = '<span class="favored-badge">FAVORED</span>' if label == best_label else ''
+        img_tag = f'<img src="{logo_url}" width="38" style="margin-bottom:8px;">' if logo_url else '<div style="height:38px;"></div>'
+
+        cards_html += (
+            f'<div class="prob-card {is_best}">'
+            f'{badge_tag}'
+            f'{img_tag}'
+            f'<div class="card-title">{label}</div>'
+            f'<div class="card-subtitle">{subtitle}</div>'
+            f'<div class="card-pct">{pct:.1f}%</div>'
+            f'<div class="mini-bar-track"><div class="mini-bar-fill {is_best}" style="width:{pct:.1f}%;"></div></div>'
             f'</div>'
         )
 
     return (
-        f'<div class="result-box">'
-        f'<div class="favored-tag">Most Likely: <strong>{best_label}</strong></div>'
-        f'{rows}'
+        f'<div class="result-wrapper">'
+        f'<div class="prediction-header">Match Forecast: <strong>{best_label} favored</strong></div>'
+        f'<div class="cards-grid">{cards_html}</div>'
         f'</div>'
     )
 
 
-# --- OFFICIAL PREMIER LEAGUE CSS STYLING ---
-# --- LIGHTER PREMIER LEAGUE PURPLE CSS STYLING ---
+# --- INTUITIVE & MODERN CSS STYLING ---
 css = """
 <style>
-/* Main Title & Subtitle */
+/* Header Styling */
 #title {
     text-align: center;
-    font-size: 42px;
+    font-size: 38px;
     font-weight: 800;
     color: #6B1D78;
-    letter-spacing: -0.5px;
+    margin-bottom: 0px;
 }
 
 #subtitle {
     text-align: center;
-    font-size: 18px;
-    color: #666;
-    margin-bottom: 30px;
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 25px;
 }
 
-/* Prediction Result Card */
-.result-box {
-    margin-top: 25px;
-    padding: 30px;
+/* Matchup Card Header */
+.vs-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: linear-gradient(135deg, #ffffff 0%, #faeffc 100%);
     border: 2px solid #6B1D78;
     border-radius: 16px;
-    background: #FAEFFC;
-    box-shadow: 0 4px 12px rgba(107, 29, 120, 0.08);
+    padding: 15px;
+    margin-bottom: 20px;
 }
 
-.placeholder {
-    margin-top: 25px;
-    padding: 30px;
+.vs-team {
     text-align: center;
-    font-size: 18px;
-    color: #777;
-    border: 2px dashed #6B1D78;
-    border-radius: 16px;
-    background: #fafafa;
+    font-weight: 700;
+    color: #6B1D78;
+    font-size: 16px;
 }
 
-.favored-tag {
+.vs-badge {
+    background: #6B1D78;
+    color: #00ff85;
+    font-weight: 900;
+    font-size: 18px;
+    padding: 8px 16px;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(107, 29, 120, 0.2);
+}
+
+/* Prediction Output Grid */
+.result-wrapper {
+    margin-top: 20px;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e0d0e3;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+}
+
+.prediction-header {
     text-align: center;
     font-size: 20px;
     color: #6B1D78;
-    margin-bottom: 25px;
-    font-weight: 600;
+    margin-bottom: 20px;
 }
 
-.favored-tag strong {
+.prediction-header strong {
     color: #38003c;
     background: #00ff85;
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 6px;
 }
 
-/* Progress Bars & Rows */
-.outcome-row {
-    display: flex;
-    align-items: center;
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 15px;
-    margin-bottom: 18px;
 }
 
-.outcome-label {
-    min-width: 160px;
-    font-size: 18px;
+.prob-card {
+    position: relative;
+    background: #fdfafd;
+    border: 2px solid #eed7f2;
+    border-radius: 12px;
+    padding: 15px 10px;
+    text-align: center;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.prob-card:hover {
+    transform: translateY(-3px);
+}
+
+.prob-card.highlight-card {
+    border-color: #6B1D78;
+    background: #faeffc;
+    box-shadow: 0 4px 12px rgba(107, 29, 120, 0.12);
+}
+
+.favored-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #6B1D78;
+    color: #00ff85;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+}
+
+.card-title {
+    font-size: 16px;
     font-weight: 700;
     color: #6B1D78;
-    text-align: right;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    margin-top: 5px;
 }
 
-.bar-track {
-    flex: 1;
-    height: 28px;
-    background: #EED7F2;
-    border-radius: 14px;
+.card-subtitle {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 8px;
+}
+
+.card-pct {
+    font-size: 24px;
+    font-weight: 800;
+    color: #38003c;
+    margin-bottom: 10px;
+}
+
+.mini-bar-track {
+    width: 100%;
+    height: 8px;
+    background: #eed7f2;
+    border-radius: 4px;
     overflow: hidden;
 }
 
-.bar-fill {
+.mini-bar-fill {
     height: 100%;
-    background: #B484BC;
-    border-radius: 14px;
-    transition: width 0.5s ease;
+    background: #b484bc;
+    border-radius: 4px;
 }
 
-/* Winning / Most Likely Bar Highlight */
-.bar-fill.highlight {
+.mini-bar-fill.highlight-card {
     background: #00ff85;
 }
 
-.outcome-row.highlight .outcome-label {
-    color: #6B1D78;
+.placeholder {
+    margin-top: 20px;
+    padding: 25px;
+    text-align: center;
+    font-size: 16px;
+    color: #777;
+    border: 2px dashed #b484bc;
+    border-radius: 14px;
+    background: #fafafa;
 }
 
-.outcome-pct {
-    min-width: 65px;
-    font-size: 18px;
-    font-weight: 700;
-    color: #6B1D78;
-}
-
-.outcome-row.highlight .outcome-pct {
-    color: #6B1D78;
-    font-size: 20px;
-}
-
-/* Streamlit Button Override */
+/* Streamlit Button Styling */
 div.stButton > button:first-child {
     background-color: #6B1D78 !important;
     color: #00ff85 !important;
     border: none !important;
-    font-size: 20px !important;
+    font-size: 18px !important;
     font-weight: bold !important;
     border-radius: 10px !important;
     padding: 12px 0px !important;
@@ -289,7 +342,13 @@ div.stButton > button:first-child {
 div.stButton > button:first-child:hover {
     background-color: #52145D !important;
     color: #00ff85 !important;
-    box-shadow: 0 4px 10px rgba(107, 29, 120, 0.3);
+    box-shadow: 0 4px 12px rgba(107, 29, 120, 0.3);
+}
+
+@media (max-width: 600px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
 }
 </style>
 """
@@ -298,22 +357,36 @@ st.markdown(css, unsafe_allow_html=True)
 
 # --- STREAMLIT USER INTERFACE ---
 st.markdown("<h1 id='title'>Premier League Match Predictor</h1>", unsafe_allow_html=True)
-st.markdown("<p id='subtitle'>Predict the outcome of a Premier League match using Machine Learning</p>", unsafe_allow_html=True)
+st.markdown("<p id='subtitle'>Select teams to analyze win probabilities powered by Machine Learning</p>", unsafe_allow_html=True)
 
 col1, col2 = st.columns(2)
 
 with col1:
     home_team = st.selectbox("HOME TEAM", options=teams, index=teams.index("Chelsea") if "Chelsea" in teams else 0)
-    st.image(TEAM_LOGOS.get(home_team, DEFAULT_LOGO), width=50)
 
 with col2:
     away_team = st.selectbox("AWAY TEAM", options=teams, index=teams.index("Fulham") if "Fulham" in teams else 0)
-    st.image(TEAM_LOGOS.get(away_team, DEFAULT_LOGO), width=50)
 
-predict_clicked = st.button("PREDICT MATCH", type="primary", use_container_width=True)
+# Dynamic VS Matchup Header
+vs_html = f"""
+<div class="vs-banner">
+    <div class="vs-team">
+        <img src="{TEAM_LOGOS.get(home_team, DEFAULT_LOGO)}" width="45"><br>
+        {home_team}
+    </div>
+    <div class="vs-badge">VS</div>
+    <div class="vs-team">
+        <img src="{TEAM_LOGOS.get(away_team, DEFAULT_LOGO)}" width="45"><br>
+        {away_team}
+    </div>
+</div>
+"""
+st.html(vs_html)
+
+predict_clicked = st.button("RUN PREDICTION", type="primary", use_container_width=True)
 
 if predict_clicked:
     html_output = render_results(home_team, away_team)
     st.html(html_output)
 else:
-    st.html("<div class='placeholder'>Select two teams and click Predict to see the odds.</div>")
+    st.html("<div class='placeholder'>Select two teams above and click <strong>RUN PREDICTION</strong> to see probabilities.</div>")
