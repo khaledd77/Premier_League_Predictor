@@ -6,9 +6,10 @@ import pandas as pd
 import streamlit as st
 
 # Set Streamlit Page Title & Configuration
+# Set Streamlit Page Title & Configuration
 st.set_page_config(
     page_title="Premier League Match Predictor",
-    page_icon="⚽",
+    page_icon="https://resources.premierleague.com/premierleague/badges/50/t-default.png",
     layout="centered",
 )
 
