@@ -19,23 +19,43 @@ TEAM_LOGOS = {
     "Bournemouth": "https://resources.premierleague.com/premierleague/badges/50/t91.png",
     "Brentford": "https://resources.premierleague.com/premierleague/badges/50/t94.png",
     "Brighton": "https://resources.premierleague.com/premierleague/badges/50/t36.png",
+    "Brighton & Hove Albion": "https://resources.premierleague.com/premierleague/badges/50/t36.png",
+    "Burnley": "https://resources.premierleague.com/premierleague/badges/50/t90.png",
+    "Cardiff City": "https://resources.premierleague.com/premierleague/badges/50/t97.png",
     "Chelsea": "https://resources.premierleague.com/premierleague/badges/50/t8.png",
     "Crystal Palace": "https://resources.premierleague.com/premierleague/badges/50/t9.png",
     "Everton": "https://resources.premierleague.com/premierleague/badges/50/t11.png",
     "Fulham": "https://resources.premierleague.com/premierleague/badges/50/t54.png",
+    "Huddersfield Town": "https://resources.premierleague.com/premierleague/badges/50/t38.png",
     "Ipswich": "https://resources.premierleague.com/premierleague/badges/50/t40.png",
+    "Ipswich Town": "https://resources.premierleague.com/premierleague/badges/50/t40.png",
+    "Leeds United": "https://resources.premierleague.com/premierleague/badges/50/t2.png",
     "Leicester": "https://resources.premierleague.com/premierleague/badges/50/t13.png",
+    "Leicester City": "https://resources.premierleague.com/premierleague/badges/50/t13.png",
     "Liverpool": "https://resources.premierleague.com/premierleague/badges/50/t14.png",
+    "Luton Town": "https://resources.premierleague.com/premierleague/badges/50/t102.png",
     "Manchester City": "https://resources.premierleague.com/premierleague/badges/50/t43.png",
     "Manchester United": "https://resources.premierleague.com/premierleague/badges/50/t1.png",
     "Newcastle United": "https://resources.premierleague.com/premierleague/badges/50/t4.png",
+    "Norwich City": "https://resources.premierleague.com/premierleague/badges/50/t45.png",
     "Nottingham Forest": "https://resources.premierleague.com/premierleague/badges/50/t17.png",
+    "Sheffield United": "https://resources.premierleague.com/premierleague/badges/50/t49.png",
     "Southampton": "https://resources.premierleague.com/premierleague/badges/50/t20.png",
-    "Tottenham": "https://assets.football-logos.cc/logos/england/1500x1500/tottenham.b32501c6.png",
+    "Stoke City": "https://resources.premierleague.com/premierleague/badges/50/t110.png",
+    "Sunderland": "https://resources.premierleague.com/premierleague/badges/50/t29.png",
+    "Swansea City": "https://resources.premierleague.com/premierleague/badges/50/t80.png",
+    "Tottenham": "https://resources.premierleague.com/premierleague/badges/50/t6.png",
+    "Tottenham Hotspur": "https://resources.premierleague.com/premierleague/badges/50/t6.png",
+    "Watford": "https://resources.premierleague.com/premierleague/badges/50/t57.png",
+    "West Bromwich Albion": "https://resources.premierleague.com/premierleague/badges/50/t35.png",
     "West Ham": "https://resources.premierleague.com/premierleague/badges/50/t21.png",
-    "Wolves": "https://resources.premierleague.com/premierleague/badges/50/t39.png"
+    "West Ham United": "https://resources.premierleague.com/premierleague/badges/50/t21.png",
+    "Wolves": "https://resources.premierleague.com/premierleague/badges/50/t39.png",
+    "Wolverhampton Wanderers": "https://resources.premierleague.com/premierleague/badges/50/t39.png",
 }
-DEFAULT_LOGO = "https://resources.premierleague.com/premierleague/badges/50/t-default.png"
+DEFAULT_LOGO = (
+    "https://resources.premierleague.com/premierleague/badges/50/t-default.png"
+)
 
 # --- FILE PATH RESOLUTION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -100,21 +120,23 @@ def predict_match(home_team, away_team):
         h2h_away_wins = h2h[(away_team, home_team)]["home_wins"]
 
     X = pd.DataFrame(
-        [[
-            home_avg_scored,
-            home_avg_conceded,
-            home_wins,
-            home_draws,
-            home_losses,
-            away_avg_scored,
-            away_avg_conceded,
-            away_wins,
-            away_draws,
-            away_losses,
-            h2h_home_wins,
-            h2h_draws,
-            h2h_away_wins,
-        ]],
+        [
+            [
+                home_avg_scored,
+                home_avg_conceded,
+                home_wins,
+                home_draws,
+                home_losses,
+                away_avg_scored,
+                away_avg_conceded,
+                away_wins,
+                away_draws,
+                away_losses,
+                h2h_home_wins,
+                h2h_draws,
+                h2h_away_wins,
+            ]
+        ],
         columns=features,
     )
 
@@ -134,9 +156,19 @@ def render_results(home_team, away_team):
     result = predict_match(home_team, away_team)
 
     outcomes = [
-        (home_team, result["home_win"] * 100, TEAM_LOGOS.get(home_team, DEFAULT_LOGO), "Home Win"),
+        (
+            home_team,
+            result["home_win"] * 100,
+            TEAM_LOGOS.get(home_team, DEFAULT_LOGO),
+            "Home Win",
+        ),
         ("Draw", result["draw"] * 100, "", "Draw"),
-        (away_team, result["away_win"] * 100, TEAM_LOGOS.get(away_team, DEFAULT_LOGO), "Away Win"),
+        (
+            away_team,
+            result["away_win"] * 100,
+            TEAM_LOGOS.get(away_team, DEFAULT_LOGO),
+            "Away Win",
+        ),
     ]
 
     best_outcome = max(outcomes, key=lambda x: x[1])
@@ -145,25 +177,33 @@ def render_results(home_team, away_team):
     cards_html = ""
     for label, pct, logo_url, subtitle in outcomes:
         is_best = "highlight-card" if label == best_label else ""
-        badge_tag = '<span class="favored-badge">FAVORED</span>' if label == best_label else ''
-        img_tag = f'<img src="{logo_url}" width="38" style="margin-bottom:8px;">' if logo_url else '<div style="height:38px;"></div>'
+        badge_tag = (
+            '<span class="favored-badge">FAVORED</span>'
+            if label == best_label
+            else ""
+        )
+        img_tag = (
+            f'<img src="{logo_url}" width="38" style="margin-bottom:8px;">'
+            if logo_url
+            else '<div style="height:38px;"></div>'
+        )
 
         cards_html += (
             f'<div class="prob-card {is_best}">'
-            f'{badge_tag}'
-            f'{img_tag}'
+            f"{badge_tag}"
+            f"{img_tag}"
             f'<div class="card-title">{label}</div>'
             f'<div class="card-subtitle">{subtitle}</div>'
             f'<div class="card-pct">{pct:.1f}%</div>'
             f'<div class="mini-bar-track"><div class="mini-bar-fill {is_best}" style="width:{pct:.1f}%;"></div></div>'
-            f'</div>'
+            f"</div>"
         )
 
     return (
         f'<div class="result-wrapper">'
         f'<div class="prediction-header">Match Forecast: <strong>{best_label} favored</strong></div>'
         f'<div class="cards-grid">{cards_html}</div>'
-        f'</div>'
+        f"</div>"
     )
 
 
@@ -388,16 +428,30 @@ div.stButton > button:first-child:hover {
 st.markdown(css, unsafe_allow_html=True)
 
 # --- STREAMLIT USER INTERFACE ---
-st.markdown("<h1 id='title'>Premier League Match Predictor</h1>", unsafe_allow_html=True)
-st.markdown("<p id='subtitle'>Select teams to analyze win probabilities powered by Machine Learning</p>", unsafe_allow_html=True)
+st.markdown(
+    "<h1 id='title'>Premier League Match Predictor</h1>", unsafe_allow_html=True
+)
+st.markdown(
+    "<p id='subtitle'>Select teams to analyze win probabilities powered by"
+    " Machine Learning</p>",
+    unsafe_allow_html=True,
+)
 
 col1, col2 = st.columns(2)
 
 with col1:
-    home_team = st.selectbox("HOME TEAM", options=teams, index=teams.index("Chelsea") if "Chelsea" in teams else 0)
+    home_team = st.selectbox(
+        "HOME TEAM",
+        options=teams,
+        index=teams.index("Chelsea") if "Chelsea" in teams else 0,
+    )
 
 with col2:
-    away_team = st.selectbox("AWAY TEAM", options=teams, index=teams.index("Fulham") if "Fulham" in teams else 0)
+    away_team = st.selectbox(
+        "AWAY TEAM",
+        options=teams,
+        index=teams.index("Fulham") if "Fulham" in teams else 0,
+    )
 
 # Dynamic VS Matchup Header
 vs_html = f"""
@@ -415,10 +469,15 @@ vs_html = f"""
 """
 st.html(vs_html)
 
-predict_clicked = st.button("RUN PREDICTION", type="primary", use_container_width=True)
+predict_clicked = st.button(
+    "RUN PREDICTION", type="primary", use_container_width=True
+)
 
 if predict_clicked:
     html_output = render_results(home_team, away_team)
     st.html(html_output)
 else:
-    st.html("<div class='placeholder'>Select two teams above and click <strong>RUN PREDICTION</strong> to see probabilities.</div>")
+    st.html(
+        "<div class='placeholder'>Select two teams above and click <strong>RUN"
+        " PREDICTION</strong> to see probabilities.</div>"
+    )
