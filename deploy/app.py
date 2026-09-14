@@ -4,6 +4,7 @@ import urllib.parse
 from collections import defaultdict, deque
 
 import pandas as pd
+import requests
 import streamlit as st
 
 # Set Page Config
@@ -130,7 +131,9 @@ TEAM_LOGOS = {
     "leeds united": "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg",
     "leicester": "https://upload.wikimedia.org/wikipedia/en/2/2d/Leicester_City_crest.svg",
     "leicester city": "https://upload.wikimedia.org/wikipedia/en/2/2d/Leicester_City_crest.svg",
-    "liverpool": "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg",
+    # "liverpool" intentionally omitted for now — the previously used file showed an
+    # outdated crest and the correct current-season URL hasn't been confirmed yet.
+    # Falls back to the colored initials badge below until this is filled in.
     "luton": "https://upload.wikimedia.org/wikipedia/en/9/9d/LutonTownFC2009.svg",
     "luton town": "https://upload.wikimedia.org/wikipedia/en/9/9d/LutonTownFC2009.svg",
     "manchester city": "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
@@ -197,14 +200,15 @@ TEAM_COLORS = {
 
 
 def get_team_logo(team_name: str) -> str:
-    """Safely retrieves team logo URL regardless of spacing or capitalization."""
+    """Safely retrieves team logo URL regardless of spacing or capitalization.
+    Returns None if no URL is on file for this team (triggers the badge fallback)."""
     clean_name = str(team_name).strip().lower()
-    fallback_logo = "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
-    return TEAM_LOGOS.get(clean_name, fallback_logo)
+    return TEAM_LOGOS.get(clean_name)
 
 
 def get_fallback_badge_uri(team_name: str) -> str:
-    """Builds a self-contained SVG badge (no network needed) used if the real logo fails to load."""
+    """Builds a self-contained SVG badge (no network needed) used whenever the real
+    logo is missing or fails a reachability check."""
     color = TEAM_COLORS.get(team_name.strip().lower(), "#666666")
     initials = "".join(w[0] for w in team_name.split()[:3]).upper()
     svg = (
@@ -217,16 +221,32 @@ def get_fallback_badge_uri(team_name: str) -> str:
     return "data:image/svg+xml," + urllib.parse.quote(svg)
 
 
+@st.cache_data(ttl=86400, show_spinner=False)
+def url_is_reachable(url: str) -> bool:
+    """Checks a URL server-side, in Python — this is what actually decides which
+    image to show. Nothing here depends on browser JavaScript, so there is no inline
+    onerror handler for Streamlit's HTML sanitizer to strip out."""
+    try:
+        resp = requests.head(url, timeout=4, allow_redirects=True)
+        if resp.status_code >= 400:
+            # Some servers (including some Wikimedia paths) don't support HEAD properly
+            resp = requests.get(url, timeout=4, stream=True)
+        return resp.status_code < 400
+    except requests.RequestException:
+        return False
+
+
 def render_team_image(team_name: str, size: int = 60) -> str:
-    """Returns an <img> tag that automatically falls back to a colored badge if the
-    Wikipedia URL fails to load, is renamed, or gets blocked."""
+    """Returns a single <img> tag pointing at whichever source is actually valid,
+    decided in Python before any HTML is generated."""
     logo_url = get_team_logo(team_name)
-    fallback_uri = get_fallback_badge_uri(team_name)
-    return (
-        f'<img src="{logo_url}" width="{size}" height="{size}" '
-        f'style="object-fit: contain;" '
-        f"onerror=\"this.onerror=null; this.src='{fallback_uri}';\" />"
-    )
+
+    if logo_url and url_is_reachable(logo_url):
+        src = logo_url
+    else:
+        src = get_fallback_badge_uri(team_name)
+
+    return f'<img src="{src}" width="{size}" height="{size}" style="object-fit: contain;" />'
 
 
 # ==========================================
