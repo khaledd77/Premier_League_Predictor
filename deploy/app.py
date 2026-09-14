@@ -440,7 +440,7 @@ with open(LION_PATH, "rb") as f:
 st.markdown(
     f"""
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px;">
-        <img src="data:image/jpeg;base64,{lion_b64}" width="48" style="vertical-align: middle; mix-blend-mode: screen;">
+        <img src="data:image/jpeg;base64,{lion_b64}" width="70" style="vertical-align: middle; mix-blend-mode: screen;">
         <h1 id="title" style="margin: 0; line-height: 1;">Premier League Match Predictor</h1>
     </div>
     """,
