@@ -430,7 +430,13 @@ st.markdown(css, unsafe_allow_html=True)
 
 # --- STREAMLIT USER INTERFACE ---
 st.markdown(
-    "<h1 id='title'>Premier League Match Predictor</h1>", unsafe_allow_html=True
+    """
+    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px;">
+        <img src="https://resources.premierleague.com/premierleague/badges/50/t-default.png" width="48" style="vertical-align: middle;">
+        <h1 id="title" style="margin: 0; line-height: 1;">Premier League Match Predictor</h1>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 st.markdown(
     "<p id='subtitle'>Select teams to analyze win probabilities powered by"
