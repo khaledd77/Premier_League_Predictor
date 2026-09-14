@@ -432,7 +432,7 @@ st.markdown(css, unsafe_allow_html=True)
 st.markdown(
     """
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px;">
-        <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg" width="48" style="vertical-align: middle; filter: brightness(0) invert(1);">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Premier_League_Lion_Icon.svg" width="48" style="vertical-align: middle; filter: brightness(0) invert(1);">
         <h1 id="title" style="margin: 0; line-height: 1;">Premier League Match Predictor</h1>
     </div>
     """,
