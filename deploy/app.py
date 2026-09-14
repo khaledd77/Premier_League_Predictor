@@ -31,7 +31,7 @@ TEAM_LOGOS = {
     "Newcastle United": "https://resources.premierleague.com/premierleague/badges/50/t4.png",
     "Nottingham Forest": "https://resources.premierleague.com/premierleague/badges/50/t17.png",
     "Southampton": "https://resources.premierleague.com/premierleague/badges/50/t20.png",
-    "Tottenham": "https://resources.premierleague.com/premierleague/badges/50/t6.png",
+    "Tottenham": "https://football-logos.cc/logos/england/tottenham.png",
     "West Ham": "https://resources.premierleague.com/premierleague/badges/50/t21.png",
     "Wolves": "https://resources.premierleague.com/premierleague/badges/50/t39.png"
 }
