@@ -431,7 +431,8 @@ st.markdown(css, unsafe_allow_html=True)
 import base64
 
 # --- LOAD LOCAL LION LOGO ---
-LION_PATH = os.path.join(BASE_DIR, "pl_lion.jpg")
+# --- LOAD LOCAL LION LOGO (TRANSPARENT PNG) ---
+LION_PATH = os.path.join(BASE_DIR, "pl_lion.png")
 
 with open(LION_PATH, "rb") as f:
     lion_b64 = base64.b64encode(f.read()).decode()
@@ -440,7 +441,7 @@ with open(LION_PATH, "rb") as f:
 st.markdown(
     f"""
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px;">
-        <img src="data:image/jpeg;base64,{lion_b64}" width="150" style="vertical-align: middle; mix-blend-mode: screen;">
+        <img src="data:image/png;base64,{lion_b64}" width="150" style="vertical-align: middle;">
         <h1 id="title" style="margin: 0; line-height: 1;">Premier League Match Predictor</h1>
     </div>
     """,
