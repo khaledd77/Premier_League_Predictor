@@ -1,3 +1,8 @@
+import os
+import pickle
+from collections import defaultdict, deque
+
+import pandas as pd
 import streamlit as st
 
 # Set Page Config
@@ -8,167 +13,169 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. TEAM LOGOS DICTIONARY & HELPER
+# 1. LOAD MODEL ARTIFACTS
+# ==========================================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "predictor_artifacts.pkl")
+
+with open(MODEL_PATH, "rb") as f:
+    artifacts = pickle.load(f)
+
+model = artifacts["model"]
+features = artifacts["features"]
+encoder = artifacts["encoder"]
+teams_list = artifacts["teams"]
+
+team_stats = defaultdict(lambda: {"goals_scored": [], "goals_conceded": []})
+team_stats.update(artifacts["team_stats"])
+
+last5 = defaultdict(lambda: deque(maxlen=5))
+for team, results in artifacts["last5"].items():
+    last5[team] = deque(results, maxlen=5)
+
+h2h = defaultdict(lambda: {"home_wins": 0, "draws": 0, "away_wins": 0})
+h2h.update(artifacts["h2h"])
+
+
+def predict_match(home_team, away_team):
+
+    home_avg_scored = sum(team_stats[home_team]["goals_scored"]) / len(
+        team_stats[home_team]["goals_scored"]
+    )
+    home_avg_conceded = sum(team_stats[home_team]["goals_conceded"]) / len(
+        team_stats[home_team]["goals_conceded"]
+    )
+    away_avg_scored = sum(team_stats[away_team]["goals_scored"]) / len(
+        team_stats[away_team]["goals_scored"]
+    )
+    away_avg_conceded = sum(team_stats[away_team]["goals_conceded"]) / len(
+        team_stats[away_team]["goals_conceded"]
+    )
+
+    home_last5 = last5[home_team]
+    away_last5 = last5[away_team]
+
+    home_wins = home_last5.count("W")
+    home_draws = home_last5.count("D")
+    home_losses = home_last5.count("L")
+
+    away_wins = away_last5.count("W")
+    away_draws = away_last5.count("D")
+    away_losses = away_last5.count("L")
+
+    h2h_home_wins = 0
+    h2h_draws = 0
+    h2h_away_wins = 0
+
+    if (home_team, away_team) in h2h:
+        h2h_home_wins = h2h[(home_team, away_team)]["home_wins"]
+        h2h_draws = h2h[(home_team, away_team)]["draws"]
+        h2h_away_wins = h2h[(home_team, away_team)]["away_wins"]
+    elif (away_team, home_team) in h2h:
+        h2h_home_wins = h2h[(away_team, home_team)]["away_wins"]
+        h2h_draws = h2h[(away_team, home_team)]["draws"]
+        h2h_away_wins = h2h[(away_team, home_team)]["home_wins"]
+
+    X = pd.DataFrame(
+        [[
+            home_avg_scored,
+            home_avg_conceded,
+            home_wins,
+            home_draws,
+            home_losses,
+            away_avg_scored,
+            away_avg_conceded,
+            away_wins,
+            away_draws,
+            away_losses,
+            h2h_home_wins,
+            h2h_draws,
+            h2h_away_wins,
+        ]],
+        columns=features,
+    )
+
+    probabilities = model.predict_proba(X)[0]
+
+    return {
+        "home_win": probabilities[2],
+        "draw": probabilities[1],
+        "away_win": probabilities[0],
+    }
+
+
+# ==========================================
+# 2. TEAM LOGOS DICTIONARY & HELPER
 # ==========================================
 TEAM_LOGOS = {
     "arsenal": "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg",
-    "aston villa": (
-        "https://upload.wikimedia.org/wikipedia/en/f/f9/Aston_Villa_FC_crest_%282016%29.svg"
-    ),
-    "bournemouth": (
-        "https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg"
-    ),
-    "brentford": (
-        "https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg"
-    ),
-    "brighton": (
-        "https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg"
-    ),
-    "brighton & hove albion": (
-        "https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg"
-    ),
-    "burnley": (
-        "https://upload.wikimedia.org/wikipedia/en/6/62/Burnley_F.C._logo.svg"
-    ),
-    "cardiff": (
-        "https://upload.wikimedia.org/wikipedia/en/3/3c/Cardiff_City_crest.svg"
-    ),
-    "cardiff city": (
-        "https://upload.wikimedia.org/wikipedia/en/3/3c/Cardiff_City_crest.svg"
-    ),
+    "aston villa": "https://upload.wikimedia.org/wikipedia/en/f/f9/Aston_Villa_FC_crest_%282016%29.svg",
+    "bournemouth": "https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg",
+    "brentford": "https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg",
+    "brighton": "https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg",
+    "brighton & hove albion": "https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg",
+    "burnley": "https://upload.wikimedia.org/wikipedia/en/6/62/Burnley_F.C._logo.svg",
+    "cardiff": "https://upload.wikimedia.org/wikipedia/en/3/3c/Cardiff_City_crest.svg",
+    "cardiff city": "https://upload.wikimedia.org/wikipedia/en/3/3c/Cardiff_City_crest.svg",
     "chelsea": "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg",
-    "crystal palace": (
-        "https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg"
-    ),
-    "everton": (
-        "https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg"
-    ),
-    "fulham": (
-        "https://upload.wikimedia.org/wikipedia/en/7/70/Fulham_FC_%28shield%29.svg"
-    ),
-    "huddersfield": (
-        "https://upload.wikimedia.org/wikipedia/en/7/7d/Huddersfield_Town_A.F.C._logo.svg"
-    ),
-    "huddersfield town": (
-        "https://upload.wikimedia.org/wikipedia/en/7/7d/Huddersfield_Town_A.F.C._logo.svg"
-    ),
-    "ipswich": (
-        "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town_FC_logo.svg"
-    ),
-    "ipswich town": (
-        "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town_FC_logo.svg"
-    ),
-    "leeds": (
-        "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg"
-    ),
-    "leeds united": (
-        "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg"
-    ),
-    "leicester": (
-        "https://upload.wikimedia.org/wikipedia/en/2/2d/Leicester_City_crest.svg"
-    ),
-    "leicester city": (
-        "https://upload.wikimedia.org/wikipedia/en/2/2d/Leicester_City_crest.svg"
-    ),
+    "crystal palace": "https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg",
+    "everton": "https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg",
+    "fulham": "https://upload.wikimedia.org/wikipedia/en/7/70/Fulham_FC_%28shield%29.svg",
+    "huddersfield": "https://upload.wikimedia.org/wikipedia/en/7/7d/Huddersfield_Town_A.F.C._logo.svg",
+    "huddersfield town": "https://upload.wikimedia.org/wikipedia/en/7/7d/Huddersfield_Town_A.F.C._logo.svg",
+    "ipswich": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town_FC_logo.svg",
+    "ipswich town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town_FC_logo.svg",
+    "leeds": "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg",
+    "leeds united": "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg",
+    "leicester": "https://upload.wikimedia.org/wikipedia/en/2/2d/Leicester_City_crest.svg",
+    "leicester city": "https://upload.wikimedia.org/wikipedia/en/2/2d/Leicester_City_crest.svg",
     "liverpool": "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg",
     "luton": "https://upload.wikimedia.org/wikipedia/en/9/9d/LutonTownFC2009.svg",
-    "luton town": (
-        "https://upload.wikimedia.org/wikipedia/en/9/9d/LutonTownFC2009.svg"
-    ),
-    "manchester city": (
-        "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg"
-    ),
-    "manchester united": (
-        "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg"
-    ),
-    "newcastle": (
-        "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg"
-    ),
-    "newcastle united": (
-        "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg"
-    ),
-    "norwich": (
-        "https://upload.wikimedia.org/wikipedia/en/8/8c/Norwich_City_FC_logo.svg"
-    ),
-    "norwich city": (
-        "https://upload.wikimedia.org/wikipedia/en/8/8c/Norwich_City_FC_logo.svg"
-    ),
-    "nott'm forest": (
-        "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg"
-    ),
-    "nottingham forest": (
-        "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg"
-    ),
-    "sheffield united": (
-        "https://upload.wikimedia.org/wikipedia/en/9/9c/Sheffield_United_FC_logo.svg"
-    ),
-    "sheffield utd": (
-        "https://upload.wikimedia.org/wikipedia/en/9/9c/Sheffield_United_FC_logo.svg"
-    ),
-    "southampton": (
-        "https://upload.wikimedia.org/wikipedia/en/c/c9/FC_Southampton.svg"
-    ),
+    "luton town": "https://upload.wikimedia.org/wikipedia/en/9/9d/LutonTownFC2009.svg",
+    "manchester city": "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
+    "manchester united": "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg",
+    "newcastle": "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg",
+    "newcastle united": "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg",
+    "norwich": "https://upload.wikimedia.org/wikipedia/en/8/8c/Norwich_City_FC_logo.svg",
+    "norwich city": "https://upload.wikimedia.org/wikipedia/en/8/8c/Norwich_City_FC_logo.svg",
+    "nott'm forest": "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg",
+    "nottingham forest": "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg",
+    "sheffield united": "https://upload.wikimedia.org/wikipedia/en/9/9c/Sheffield_United_FC_logo.svg",
+    "sheffield utd": "https://upload.wikimedia.org/wikipedia/en/9/9c/Sheffield_United_FC_logo.svg",
+    "southampton": "https://upload.wikimedia.org/wikipedia/en/c/c9/FC_Southampton.svg",
     "stoke": "https://upload.wikimedia.org/wikipedia/en/2/29/Stoke_City_FC.svg",
-    "stoke city": (
-        "https://upload.wikimedia.org/wikipedia/en/2/29/Stoke_City_FC.svg"
-    ),
-    "sunderland": (
-        "https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg"
-    ),
-    "swansea": (
-        "https://upload.wikimedia.org/wikipedia/en/f/f9/Swansea_City_AFC_logo.svg"
-    ),
-    "swansea city": (
-        "https://upload.wikimedia.org/wikipedia/en/f/f9/Swansea_City_AFC_logo.svg"
-    ),
-    "tottenham": (
-        "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg"
-    ),
-    "tottenham hotspur": (
-        "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg"
-    ),
+    "stoke city": "https://upload.wikimedia.org/wikipedia/en/2/29/Stoke_City_FC.svg",
+    "sunderland": "https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg",
+    "swansea": "https://upload.wikimedia.org/wikipedia/en/f/f9/Swansea_City_AFC_logo.svg",
+    "swansea city": "https://upload.wikimedia.org/wikipedia/en/f/f9/Swansea_City_AFC_logo.svg",
+    "tottenham": "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg",
+    "tottenham hotspur": "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg",
     "watford": "https://upload.wikimedia.org/wikipedia/en/e/e2/Watford.svg",
-    "west brom": (
-        "https://upload.wikimedia.org/wikipedia/en/8/8b/West_Bromwich_Albion.svg"
-    ),
-    "west bromwich albion": (
-        "https://upload.wikimedia.org/wikipedia/en/8/8b/West_Bromwich_Albion.svg"
-    ),
-    "west ham": (
-        "https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg"
-    ),
-    "west ham united": (
-        "https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg"
-    ),
-    "wolves": (
-        "https://upload.wikimedia.org/wikipedia/en/c/fc/Wolverhampton_Wanderers.svg"
-    ),
-    "wolverhampton wanderers": (
-        "https://upload.wikimedia.org/wikipedia/en/c/fc/Wolverhampton_Wanderers.svg"
-    ),
+    "west brom": "https://upload.wikimedia.org/wikipedia/en/8/8b/West_Bromwich_Albion.svg",
+    "west bromwich albion": "https://upload.wikimedia.org/wikipedia/en/8/8b/West_Bromwich_Albion.svg",
+    "west ham": "https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg",
+    "west ham united": "https://upload.wikimedia.org/wikipedia/en/c/c2/West_Ham_United_FC_logo.svg",
+    "wolves": "https://upload.wikimedia.org/wikipedia/en/c/fc/Wolverhampton_Wanderers.svg",
+    "wolverhampton wanderers": "https://upload.wikimedia.org/wikipedia/en/c/fc/Wolverhampton_Wanderers.svg",
 }
 
 
 def get_team_logo(team_name: str) -> str:
-  """Safely retrieves team logo URL regardless of spacing or capitalization."""
-  clean_name = str(team_name).strip().lower()
-  fallback_logo = (
-      "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
-  )
-  return TEAM_LOGOS.get(clean_name, fallback_logo)
+    """Safely retrieves team logo URL regardless of spacing or capitalization."""
+    clean_name = str(team_name).strip().lower()
+    fallback_logo = "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
+    return TEAM_LOGOS.get(clean_name, fallback_logo)
 
 
 # ==========================================
-# 2. CUSTOM CSS STYLING
+# 3. CUSTOM CSS STYLING
 # ==========================================
 css = """
 <style>
-/* Dark Premier League Purple Background */
 .stApp {
     background-color: #38003c !important;
 }
 
-/* White Header Styling */
 #title {
     text-align: center;
     font-size: 38px;
@@ -185,28 +192,24 @@ css = """
     opacity: 0.9;
 }
 
-/* Dropdown Labels (HOME TEAM / AWAY TEAM) in White */
 div[data-testid="stSelectbox"] label p {
     color: #FFFFFF !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
 
-/* 1. Main Dropdown Input Box (Closed State) */
 div[data-baseweb="select"] > div:first-child {
     background-color: #ffffff !important;
     border-radius: 10px !important;
     border: 1.5px solid #6B1D78 !important;
 }
 
-/* Force all text, icons, and values inside the input box to Dark Purple */
 div[data-baseweb="select"] * {
     color: #38003c !important;
     font-weight: 600 !important;
     fill: #38003c !important;
 }
 
-/* 2. Pop-up Dropdown Options List Container (Open State) */
 div[data-baseweb="popover"],
 div[data-baseweb="menu"],
 ul[role="listbox"] {
@@ -214,21 +217,18 @@ ul[role="listbox"] {
     border-radius: 10px !important;
 }
 
-/* Individual items inside the dropdown list */
 li[role="option"],
 div[role="option"] {
     background-color: #ffffff !important;
     color: #38003c !important;
 }
 
-/* Hover & Active state for items in the list */
 li[role="option"]:hover,
 li[role="option"][aria-selected="true"] {
     background-color: #f4e8f7 !important;
     color: #38003c !important;
 }
 
-/* Matchup Header Card */
 .vs-banner {
     display: flex;
     align-items: center;
@@ -258,7 +258,6 @@ li[role="option"][aria-selected="true"] {
     box-shadow: 0 2px 8px rgba(0, 255, 133, 0.3);
 }
 
-/* Prediction Output Box */
 .result-wrapper {
     margin-top: 20px;
     padding: 20px;
@@ -371,7 +370,6 @@ li[role="option"][aria-selected="true"] {
     background: #4A0B50;
 }
 
-/* Neon Green Action Button */
 div.stButton > button:first-child {
     background-color: #00ff85 !important;
     color: #38003c !important;
@@ -398,7 +396,7 @@ div.stButton > button:first-child:hover {
 st.markdown(css, unsafe_allow_html=True)
 
 # ==========================================
-# 3. APP UI & LOGIC
+# 4. APP UI & LOGIC
 # ==========================================
 st.markdown(
     '<div id="title">Premier League Match Predictor</div>',
@@ -410,49 +408,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# List of teams sorted alphabetically
-teams_list = [
-    "Arsenal",
-    "Aston Villa",
-    "Bournemouth",
-    "Brentford",
-    "Brighton & Hove Albion",
-    "Burnley",
-    "Cardiff City",
-    "Chelsea",
-    "Crystal Palace",
-    "Everton",
-    "Fulham",
-    "Huddersfield Town",
-    "Ipswich Town",
-    "Leeds United",
-    "Leicester City",
-    "Liverpool",
-    "Luton Town",
-    "Manchester City",
-    "Manchester United",
-    "Newcastle United",
-    "Norwich City",
-    "Nottingham Forest",
-    "Sheffield United",
-    "Southampton",
-    "Stoke City",
-    "Sunderland",
-    "Swansea City",
-    "Tottenham Hotspur",
-    "Watford",
-    "West Bromwich Albion",
-    "West Ham United",
-    "Wolverhampton Wanderers",
-]
-
 col1, col2 = st.columns(2)
 with col1:
-  home_team = st.selectbox("HOME TEAM", teams_list, index=0)
+    home_team = st.selectbox(
+        "HOME TEAM", teams_list,
+        index=teams_list.index("Chelsea") if "Chelsea" in teams_list else 0,
+    )
 with col2:
-  away_team = st.selectbox("AWAY TEAM", teams_list, index=1)
+    away_team = st.selectbox(
+        "AWAY TEAM", teams_list,
+        index=teams_list.index("Fulham") if "Fulham" in teams_list else 1,
+    )
 
-# Display Team Logos Banner
 home_logo = get_team_logo(home_team)
 away_logo = get_team_logo(away_team)
 
@@ -473,77 +440,81 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Run Prediction Button & Results Container
 if st.button("RUN PREDICTION", use_container_width=True):
-  # Place your actual model inference logic here
-  prob_home = 48.5
-  prob_draw = 26.2
-  prob_away = 25.3
 
-  favored = home_team if prob_home > prob_away else away_team
+    if home_team == away_team:
+        st.markdown(
+            '<div class="placeholder">Please select two different teams.</div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        result = predict_match(home_team, away_team)
 
-  # Pre-calculate conditional classes and badges to avoid quote nesting bugs
-  home_highlight = "highlight-card" if favored == home_team else ""
-  home_badge = (
-      '<div class="favored-badge">FAVORED</div>'
-      if favored == home_team
-      else ""
-  )
+        prob_home = result["home_win"] * 100
+        prob_draw = result["draw"] * 100
+        prob_away = result["away_win"] * 100
 
-  away_highlight = "highlight-card" if favored == away_team else ""
-  away_badge = (
-      '<div class="favored-badge">FAVORED</div>'
-      if favored == away_team
-      else ""
-  )
+        favored = home_team if prob_home > prob_away else away_team
 
-  home_bar_class = f"mini-bar-fill {home_highlight}"
-  away_bar_class = f"mini-bar-fill {away_highlight}"
+        home_highlight = "highlight-card" if favored == home_team else ""
+        home_badge = (
+            '<div class="favored-badge">FAVORED</div>'
+            if favored == home_team
+            else ""
+        )
 
-  st.markdown(
-      f"""
-        <div class="result-wrapper">
-            <div class="prediction-header">Match Forecast: <strong>{favored} favored</strong></div>
-            <div class="cards-grid">
-                <div class="prob-card {home_highlight}">
-                    {home_badge}
-                    <img src="{home_logo}" width="36" height="36" style="object-fit: contain;" />
-                    <div class="card-title">{home_team}</div>
-                    <div class="card-subtitle">Home Win</div>
-                    <div class="card-pct">{prob_home}%</div>
-                    <div class="mini-bar-track">
-                        <div class="{home_bar_class}" style="width: {prob_home}%;"></div>
+        away_highlight = "highlight-card" if favored == away_team else ""
+        away_badge = (
+            '<div class="favored-badge">FAVORED</div>'
+            if favored == away_team
+            else ""
+        )
+
+        home_bar_class = f"mini-bar-fill {home_highlight}"
+        away_bar_class = f"mini-bar-fill {away_highlight}"
+
+        st.markdown(
+            f"""
+            <div class="result-wrapper">
+                <div class="prediction-header">Match Forecast: <strong>{favored} favored</strong></div>
+                <div class="cards-grid">
+                    <div class="prob-card {home_highlight}">{home_badge}
+                        <img src="{home_logo}" width="36" height="36" style="object-fit: contain;" />
+                        <div class="card-title">{home_team}</div>
+                        <div class="card-subtitle">Home Win</div>
+                        <div class="card-pct">{prob_home:.1f}%</div>
+                        <div class="mini-bar-track">
+                            <div class="{home_bar_class}" style="width: {prob_home:.1f}%;"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="prob-card">
-                    <div class="card-title">Draw</div>
-                    <div class="card-subtitle">Equal Points</div>
-                    <div class="card-pct">{prob_draw}%</div>
-                    <div class="mini-bar-track">
-                        <div class="mini-bar-fill" style="width: {prob_draw}%;"></div>
+                    <div class="prob-card">
+                        <div class="card-title">Draw</div>
+                        <div class="card-subtitle">Equal Points</div>
+                        <div class="card-pct">{prob_draw:.1f}%</div>
+                        <div class="mini-bar-track">
+                            <div class="mini-bar-fill" style="width: {prob_draw:.1f}%;"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="prob-card {away_highlight}">
-                    {away_badge}
-                    <img src="{away_logo}" width="36" height="36" style="object-fit: contain;" />
-                    <div class="card-title">{away_team}</div>
-                    <div class="card-subtitle">Away Win</div>
-                    <div class="card-pct">{prob_away}%</div>
-                    <div class="mini-bar-track">
-                        <div class="{away_bar_class}" style="width: {prob_away}%;"></div>
+                    <div class="prob-card {away_highlight}">{away_badge}
+                        <img src="{away_logo}" width="36" height="36" style="object-fit: contain;" />
+                        <div class="card-title">{away_team}</div>
+                        <div class="card-subtitle">Away Win</div>
+                        <div class="card-pct">{prob_away:.1f}%</div>
+                        <div class="mini-bar-track">
+                            <div class="{away_bar_class}" style="width: {prob_away:.1f}%;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        """,
-      unsafe_allow_html=True,
-  )
+            """,
+            unsafe_allow_html=True,
+        )
 else:
-  st.markdown(
-      """
+    st.markdown(
+        """
         <div class="placeholder">
             Select two teams above and click <strong>RUN PREDICTION</strong> to see probabilities.
         </div>
         """,
-      unsafe_allow_html=True,
-  )
+        unsafe_allow_html=True,
+    )
