@@ -1,5 +1,6 @@
 import os
 import pickle
+import urllib.parse
 from collections import defaultdict, deque
 
 import pandas as pd
@@ -105,7 +106,7 @@ def predict_match(home_team, away_team):
 
 
 # ==========================================
-# 2. TEAM LOGOS DICTIONARY & HELPER
+# 2. TEAM LOGOS DICTIONARY & HELPERS
 # ==========================================
 TEAM_LOGOS = {
     "arsenal": "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg",
@@ -159,12 +160,73 @@ TEAM_LOGOS = {
     "wolverhampton wanderers": "https://upload.wikimedia.org/wikipedia/en/c/fc/Wolverhampton_Wanderers.svg",
 }
 
+TEAM_COLORS = {
+    "arsenal": "#EF0107",
+    "aston villa": "#670E36",
+    "bournemouth": "#DA291C",
+    "brentford": "#E30613",
+    "brighton & hove albion": "#0057B8",
+    "burnley": "#6C1D45",
+    "cardiff city": "#0070B5",
+    "chelsea": "#034694",
+    "crystal palace": "#1B458F",
+    "everton": "#003399",
+    "fulham": "#CC0000",
+    "huddersfield town": "#0E63AD",
+    "ipswich town": "#0044A9",
+    "leeds united": "#1D428A",
+    "leicester city": "#003090",
+    "liverpool": "#C8102E",
+    "luton town": "#F78F1E",
+    "manchester city": "#6CABDD",
+    "manchester united": "#DA291C",
+    "newcastle united": "#241F20",
+    "norwich city": "#FFF200",
+    "nottingham forest": "#DD0000",
+    "sheffield united": "#EE2737",
+    "southampton": "#D71920",
+    "stoke city": "#E03A3E",
+    "sunderland": "#EB172F",
+    "swansea city": "#121212",
+    "tottenham hotspur": "#132257",
+    "watford": "#FBEE23",
+    "west bromwich albion": "#122F67",
+    "west ham united": "#7A263A",
+    "wolverhampton wanderers": "#FDB913",
+}
+
 
 def get_team_logo(team_name: str) -> str:
     """Safely retrieves team logo URL regardless of spacing or capitalization."""
     clean_name = str(team_name).strip().lower()
     fallback_logo = "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
     return TEAM_LOGOS.get(clean_name, fallback_logo)
+
+
+def get_fallback_badge_uri(team_name: str) -> str:
+    """Builds a self-contained SVG badge (no network needed) used if the real logo fails to load."""
+    color = TEAM_COLORS.get(team_name.strip().lower(), "#666666")
+    initials = "".join(w[0] for w in team_name.split()[:3]).upper()
+    svg = (
+        f"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>"
+        f"<circle cx='50' cy='50' r='48' fill='{color}'/>"
+        f"<text x='50' y='63' font-size='34' font-weight='800' fill='white' "
+        f"text-anchor='middle' font-family='Arial, sans-serif'>{initials}</text>"
+        f"</svg>"
+    )
+    return "data:image/svg+xml," + urllib.parse.quote(svg)
+
+
+def render_team_image(team_name: str, size: int = 60) -> str:
+    """Returns an <img> tag that automatically falls back to a colored badge if the
+    Wikipedia URL fails to load, is renamed, or gets blocked."""
+    logo_url = get_team_logo(team_name)
+    fallback_uri = get_fallback_badge_uri(team_name)
+    return (
+        f'<img src="{logo_url}" width="{size}" height="{size}" '
+        f'style="object-fit: contain;" '
+        f"onerror=\"this.onerror=null; this.src='{fallback_uri}';\" />"
+    )
 
 
 # ==========================================
@@ -420,19 +482,16 @@ with col2:
         index=teams_list.index("Fulham") if "Fulham" in teams_list else 1,
     )
 
-home_logo = get_team_logo(home_team)
-away_logo = get_team_logo(away_team)
-
 st.markdown(
     f"""
     <div class="vs-banner">
         <div style="text-align: center;">
-            <img src="{home_logo}" width="60" height="60" style="object-fit: contain;" />
+            {render_team_image(home_team, 60)}
             <div class="vs-team">{home_team}</div>
         </div>
         <div class="vs-badge">VS</div>
         <div style="text-align: center;">
-            <img src="{away_logo}" width="60" height="60" style="object-fit: contain;" />
+            {render_team_image(away_team, 60)}
             <div class="vs-team">{away_team}</div>
         </div>
     </div>
@@ -479,7 +538,7 @@ if st.button("RUN PREDICTION", use_container_width=True):
                 <div class="prediction-header">Match Forecast: <strong>{favored} favored</strong></div>
                 <div class="cards-grid">
                     <div class="prob-card {home_highlight}">{home_badge}
-                        <img src="{home_logo}" width="36" height="36" style="object-fit: contain;" />
+                        {render_team_image(home_team, 36)}
                         <div class="card-title">{home_team}</div>
                         <div class="card-subtitle">Home Win</div>
                         <div class="card-pct">{prob_home:.1f}%</div>
@@ -496,7 +555,7 @@ if st.button("RUN PREDICTION", use_container_width=True):
                         </div>
                     </div>
                     <div class="prob-card {away_highlight}">{away_badge}
-                        <img src="{away_logo}" width="36" height="36" style="object-fit: contain;" />
+                        {render_team_image(away_team, 36)}
                         <div class="card-title">{away_team}</div>
                         <div class="card-subtitle">Away Win</div>
                         <div class="card-pct">{prob_away:.1f}%</div>
