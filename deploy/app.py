@@ -20,7 +20,10 @@ TEAM_LOGOS = {
     "Brentford": "https://resources.premierleague.com/premierleague/badges/50/t94.png",
     "Brighton": "https://resources.premierleague.com/premierleague/badges/50/t36.png",
     "Chelsea": "https://resources.premierleague.com/premierleague/badges/50/t8.png",
-    "Crystal Palace": "https://resources.premierleague.com/premierleague/badges/50/t9.png",
+
+    # Updated Crystal Palace badge
+    "Crystal Palace": "https://resources.premierleague.com/premierleague/badges/70/t31.png",
+
     "Everton": "https://resources.premierleague.com/premierleague/badges/50/t11.png",
     "Fulham": "https://resources.premierleague.com/premierleague/badges/50/t54.png",
     "Ipswich": "https://resources.premierleague.com/premierleague/badges/50/t40.png",
@@ -33,9 +36,14 @@ TEAM_LOGOS = {
     "Southampton": "https://resources.premierleague.com/premierleague/badges/50/t20.png",
     "Tottenham": "https://resources.premierleague.com/premierleague/badges/50/t6.png",
     "West Ham": "https://resources.premierleague.com/premierleague/badges/50/t21.png",
-    "Wolves": "https://resources.premierleague.com/premierleague/badges/50/t39.png"
+    "Wolves": "https://resources.premierleague.com/premierleague/badges/50/t39.png",
 }
+
 DEFAULT_LOGO = "https://resources.premierleague.com/premierleague/badges/50/t-default.png"
+
+# --- PREMIER LEAGUE WHITE LION LOGO ---
+PL_LOGO = "https://resources.premierleague.com/premierleague/resources/v1.37.4/i/svg-files/elements/pl-logo-light.svg"
+
 
 # --- FILE PATH RESOLUTION ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -61,19 +69,21 @@ h2h.update(artifacts["h2h"])
 
 
 def predict_match(home_team, away_team):
-    home_avg_scored = sum(team_stats[home_team]["goals_scored"]) / len(
+    home_avg_scored = sum(
         team_stats[home_team]["goals_scored"]
-    )
-    home_avg_conceded = sum(team_stats[home_team]["goals_conceded"]) / len(
-        team_stats[home_team]["goals_conceded"]
-    )
+    ) / len(team_stats[home_team]["goals_scored"])
 
-    away_avg_scored = sum(team_stats[away_team]["goals_scored"]) / len(
+    home_avg_conceded = sum(
+        team_stats[home_team]["goals_conceded"]
+    ) / len(team_stats[home_team]["goals_conceded"])
+
+    away_avg_scored = sum(
         team_stats[away_team]["goals_scored"]
-    )
-    away_avg_conceded = sum(team_stats[away_team]["goals_conceded"]) / len(
+    ) / len(team_stats[away_team]["goals_scored"])
+
+    away_avg_conceded = sum(
         team_stats[away_team]["goals_conceded"]
-    )
+    ) / len(team_stats[away_team]["goals_conceded"])
 
     home_last5 = last5[home_team]
     away_last5 = last5[away_team]
@@ -94,6 +104,7 @@ def predict_match(home_team, away_team):
         h2h_home_wins = h2h[(home_team, away_team)]["home_wins"]
         h2h_draws = h2h[(home_team, away_team)]["draws"]
         h2h_away_wins = h2h[(home_team, away_team)]["away_wins"]
+
     elif (away_team, home_team) in h2h:
         h2h_home_wins = h2h[(away_team, home_team)]["away_wins"]
         h2h_draws = h2h[(away_team, home_team)]["draws"]
@@ -129,24 +140,55 @@ def predict_match(home_team, away_team):
 
 def render_results(home_team, away_team):
     if home_team == away_team:
-        return "<div class='placeholder'>⚠️ Please select two different teams to run a match prediction.</div>"
+        return """
+        <div class='placeholder'>
+            ⚠️ Please select two different teams to run a match prediction.
+        </div>
+        """
 
     result = predict_match(home_team, away_team)
 
     outcomes = [
-        (home_team, result["home_win"] * 100, TEAM_LOGOS.get(home_team, DEFAULT_LOGO), "Home Win"),
-        ("Draw", result["draw"] * 100, "", "Draw"),
-        (away_team, result["away_win"] * 100, TEAM_LOGOS.get(away_team, DEFAULT_LOGO), "Away Win"),
+        (
+            home_team,
+            result["home_win"] * 100,
+            TEAM_LOGOS.get(home_team, DEFAULT_LOGO),
+            "Home Win",
+        ),
+        (
+            "Draw",
+            result["draw"] * 100,
+            "",
+            "Draw",
+        ),
+        (
+            away_team,
+            result["away_win"] * 100,
+            TEAM_LOGOS.get(away_team, DEFAULT_LOGO),
+            "Away Win",
+        ),
     ]
 
     best_outcome = max(outcomes, key=lambda x: x[1])
     best_label = best_outcome[0]
 
     cards_html = ""
+
     for label, pct, logo_url, subtitle in outcomes:
+
         is_best = "highlight-card" if label == best_label else ""
-        badge_tag = '<span class="favored-badge">FAVORED</span>' if label == best_label else ''
-        img_tag = f'<img src="{logo_url}" width="38" style="margin-bottom:8px;">' if logo_url else '<div style="height:38px;"></div>'
+
+        badge_tag = (
+            '<span class="favored-badge">FAVORED</span>'
+            if label == best_label
+            else ""
+        )
+
+        img_tag = (
+            f'<img src="{logo_url}" width="38" style="margin-bottom:8px;">'
+            if logo_url
+            else '<div style="height:38px;"></div>'
+        )
 
         cards_html += (
             f'<div class="prob-card {is_best}">'
@@ -155,28 +197,43 @@ def render_results(home_team, away_team):
             f'<div class="card-title">{label}</div>'
             f'<div class="card-subtitle">{subtitle}</div>'
             f'<div class="card-pct">{pct:.1f}%</div>'
-            f'<div class="mini-bar-track"><div class="mini-bar-fill {is_best}" style="width:{pct:.1f}%;"></div></div>'
+            f'<div class="mini-bar-track">'
+            f'<div class="mini-bar-fill {is_best}" '
+            f'style="width:{pct:.1f}%;"></div>'
+            f'</div>'
             f'</div>'
         )
 
     return (
         f'<div class="result-wrapper">'
-        f'<div class="prediction-header">Match Forecast: <strong>{best_label} favored</strong></div>'
+        f'<div class="prediction-header">'
+        f'Match Forecast: <strong>{best_label} favored</strong>'
+        f'</div>'
         f'<div class="cards-grid">{cards_html}</div>'
         f'</div>'
     )
 
 
-# --- INTUITIVE & MODERN CSS STYLING ---
-# --- LIGHT PURPLE BACKGROUND & UI STYLING ---
-# --- CLASSIC PREMIER LEAGUE PURPLE WITH NEON GREEN BUTTON STYLING ---
-# --- DARK PREMIER LEAGUE PURPLE BACKGROUND & WHITE TEXT CSS ---
-# --- DARK PURPLE BACKGROUND WITH WHITE DROPDOWNS & NEON GREEN BUTTON ---
+# --- CSS STYLING ---
 css = """
 <style>
+
 /* Dark Premier League Purple Background */
 .stApp {
     background-color: #38003c !important;
+}
+
+/* Title Section */
+.title-section {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+/* Large White Premier League Lion */
+.pl-logo {
+    width: 150px;
+    height: auto;
+    margin-bottom: 8px;
 }
 
 /* White Header Styling */
@@ -185,6 +242,7 @@ css = """
     font-size: 38px;
     font-weight: 800;
     color: #FFFFFF !important;
+    margin-top: 0px;
     margin-bottom: 0px;
 }
 
@@ -196,14 +254,14 @@ css = """
     opacity: 0.9;
 }
 
-/* Dropdown Labels (HOME TEAM / AWAY TEAM) in White */
+/* Dropdown Labels */
 div[data-testid="stSelectbox"] label p {
     color: #FFFFFF !important;
     font-weight: 700 !important;
     font-size: 14px !important;
 }
 
-/* Style the Select Box inputs to be White */
+/* Style the Select Box inputs */
 div[data-baseweb="select"] > div {
     background-color: #ffffff !important;
     color: #38003c !important;
@@ -381,44 +439,99 @@ div.stButton > button:first-child:hover {
     .cards-grid {
         grid-template-columns: 1fr;
     }
+
+    .pl-logo {
+        width: 120px;
+    }
+
+    #title {
+        font-size: 30px;
+    }
 }
+
 </style>
 """
 
 st.markdown(css, unsafe_allow_html=True)
 
+
 # --- STREAMLIT USER INTERFACE ---
-st.markdown("<h1 id='title'>Premier League Match Predictor</h1>", unsafe_allow_html=True)
-st.markdown("<p id='subtitle'>Select teams to analyze win probabilities powered by Machine Learning</p>", unsafe_allow_html=True)
+
+st.markdown(
+    f"""
+    <div class="title-section">
+        <img src="{PL_LOGO}" class="pl-logo">
+        <h1 id="title">Premier League Match Predictor</h1>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.markdown(
+    "<p id='subtitle'>Select teams to analyze win probabilities powered by Machine Learning</p>",
+    unsafe_allow_html=True,
+)
+
 
 col1, col2 = st.columns(2)
 
 with col1:
-    home_team = st.selectbox("HOME TEAM", options=teams, index=teams.index("Chelsea") if "Chelsea" in teams else 0)
+    home_team = st.selectbox(
+        "HOME TEAM",
+        options=teams,
+        index=teams.index("Chelsea") if "Chelsea" in teams else 0,
+    )
 
 with col2:
-    away_team = st.selectbox("AWAY TEAM", options=teams, index=teams.index("Fulham") if "Fulham" in teams else 0)
+    away_team = st.selectbox(
+        "AWAY TEAM",
+        options=teams,
+        index=teams.index("Fulham") if "Fulham" in teams else 0,
+    )
+
 
 # Dynamic VS Matchup Header
 vs_html = f"""
 <div class="vs-banner">
+
     <div class="vs-team">
         <img src="{TEAM_LOGOS.get(home_team, DEFAULT_LOGO)}" width="45"><br>
         {home_team}
     </div>
-    <div class="vs-badge">VS</div>
+
+    <div class="vs-badge">
+        VS
+    </div>
+
     <div class="vs-team">
         <img src="{TEAM_LOGOS.get(away_team, DEFAULT_LOGO)}" width="45"><br>
         {away_team}
     </div>
+
 </div>
 """
+
 st.html(vs_html)
 
-predict_clicked = st.button("RUN PREDICTION", type="primary", use_container_width=True)
+
+predict_clicked = st.button(
+    "RUN PREDICTION",
+    type="primary",
+    use_container_width=True,
+)
+
 
 if predict_clicked:
     html_output = render_results(home_team, away_team)
     st.html(html_output)
+
 else:
-    st.html("<div class='placeholder'>Select two teams above and click <strong>RUN PREDICTION</strong> to see probabilities.</div>")
+    st.html(
+        """
+        <div class='placeholder'>
+            Select two teams above and click
+            <strong>RUN PREDICTION</strong>
+            to see probabilities.
+        </div>
+        """
+    )
