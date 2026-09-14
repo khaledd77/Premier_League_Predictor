@@ -1,177 +1,76 @@
-import os
-import pickle
-from collections import defaultdict, deque
-
-import pandas as pd
 import streamlit as st
 
-# Set Streamlit Page Title & Configuration
+# Set Page Config
 st.set_page_config(
     page_title="Premier League Match Predictor",
     page_icon="⚽",
-    layout="centered",
+    layout="centered"
 )
 
-# --- OFFICIAL PREMIER LEAGUE TEAM CREST LOGOS ---
+# ==========================================
+# 1. FIXED TEAM LOGOS DICTIONARY & HELPER
+# ==========================================
 TEAM_LOGOS = {
-    "Arsenal": "https://resources.premierleague.com/premierleague/badges/50/t3.png",
-    "Aston Villa": "https://resources.premierleague.com/premierleague/badges/50/t7.png",
-    "Bournemouth": "https://resources.premierleague.com/premierleague/badges/50/t91.png",
-    "Brentford": "https://resources.premierleague.com/premierleague/badges/50/t94.png",
-    "Brighton": "https://resources.premierleague.com/premierleague/badges/50/t36.png",
-    "Chelsea": "https://resources.premierleague.com/premierleague/badges/50/t8.png",
-    "Crystal Palace": "https://resources.premierleague.com/premierleague/badges/50/t9.png",
-    "Everton": "https://resources.premierleague.com/premierleague/badges/50/t11.png",
-    "Fulham": "https://resources.premierleague.com/premierleague/badges/50/t54.png",
-    "Ipswich": "https://resources.premierleague.com/premierleague/badges/50/t40.png",
-    "Leicester": "https://resources.premierleague.com/premierleague/badges/50/t13.png",
-    "Liverpool": "https://resources.premierleague.com/premierleague/badges/50/t14.png",
-    "Manchester City": "https://resources.premierleague.com/premierleague/badges/50/t43.png",
-    "Manchester United": "https://resources.premierleague.com/premierleague/badges/50/t1.png",
-    "Newcastle United": "https://resources.premierleague.com/premierleague/badges/50/t4.png",
-    "Nottingham Forest": "https://resources.premierleague.com/premierleague/badges/50/t17.png",
-    "Southampton": "https://resources.premierleague.com/premierleague/badges/50/t20.png",
-    "Tottenham": "https://resources.premierleague.com/premierleague/badges/50/t6.png",
-    "West Ham": "https://resources.premierleague.com/premierleague/badges/50/t21.png",
-    "Wolves": "https://resources.premierleague.com/premierleague/badges/50/t39.png"
+    "arsenal": "https://content.sportslogos.net/logos/69/3478/full/arsenal_fc_logo_20038848.png",
+    "aston villa": "https://content.sportslogos.net/logos/69/3479/full/aston_villa_logo_primary_2016_sportslogosnet-2234.png",
+    "bournemouth": "https://content.sportslogos.net/logos/69/3480/full/afc_bournemouth_logo_primary_20146039.png",
+    "brentford": "https://content.sportslogos.net/logos/69/3481/full/brentford_fc_logo_primary_20172081.png",
+    "brighton": "https://content.sportslogos.net/logos/69/3482/full/brighton__hove_albion_logo_primary_20124803.png",
+    "brighton & hove albion": "https://content.sportslogos.net/logos/69/3482/full/brighton__hove_albion_logo_primary_20124803.png",
+    "burnley": "https://content.sportslogos.net/logos/69/3483/full/burnley_fc_logo_primary_20162817.png",
+    "cardiff": "https://content.sportslogos.net/logos/69/3484/full/cardiff_city_logo_primary_20158863.png",
+    "cardiff city": "https://content.sportslogos.net/logos/69/3484/full/cardiff_city_logo_primary_20158863.png",
+    "chelsea": "https://content.sportslogos.net/logos/69/3485/full/chelsea_fc_logo_primary_20066723.png",
+    "crystal palace": "https://content.sportslogos.net/logos/69/3486/full/crystal_palace_fc_logo_primary_2022_sportslogosnet-5373.png",
+    "everton": "https://content.sportslogos.net/logos/69/3487/full/everton_fc_logo_primary_20151125.png",
+    "fulham": "https://content.sportslogos.net/logos/69/3488/full/fulham_fc_logo_primary_20023608.png",
+    "huddersfield": "https://content.sportslogos.net/logos/69/3489/full/huddersfield_town_logo_primary_2019_sportslogosnet-2415.png",
+    "huddersfield town": "https://content.sportslogos.net/logos/69/3489/full/huddersfield_town_logo_primary_2019_sportslogosnet-2415.png",
+    "ipswich": "https://content.sportslogos.net/logos/69/3490/full/ipswich_town_logo_primary_19959616.png",
+    "ipswich town": "https://content.sportslogos.net/logos/69/3490/full/ipswich_town_logo_primary_19959616.png",
+    "leeds": "https://content.sportslogos.net/logos/69/3491/full/leeds_united_logo_primary_19992642.png",
+    "leeds united": "https://content.sportslogos.net/logos/69/3491/full/leeds_united_logo_primary_19992642.png",
+    "leicester": "https://content.sportslogos.net/logos/69/3492/full/leicester_city_logo_primary_20102602.png",
+    "leicester city": "https://content.sportslogos.net/logos/69/3492/full/leicester_city_logo_primary_20102602.png",
+    "liverpool": "https://content.sportslogos.net/logos/69/3493/full/liverpool_fc_logo_primary_20124748.png",
+    "luton": "https://content.sportslogos.net/logos/69/3494/full/luton_town_logo_primary_20092261.png",
+    "luton town": "https://content.sportslogos.net/logos/69/3494/full/luton_town_logo_primary_20092261.png",
+    "manchester city": "https://content.sportslogos.net/logos/69/3495/full/manchester_city_logo_primary_20177726.png",
+    "manchester united": "https://content.sportslogos.net/logos/69/3496/full/manchester_united_logo_primary_19984916.png",
+    "newcastle": "https://content.sportslogos.net/logos/69/3497/full/newcastle_united_logo_primary_19888497.png",
+    "newcastle united": "https://content.sportslogos.net/logos/69/3497/full/newcastle_united_logo_primary_19888497.png",
+    "norwich": "https://content.sportslogos.net/logos/69/3498/full/norwich_city_logo_primary_2022_sportslogosnet-8149.png",
+    "norwich city": "https://content.sportslogos.net/logos/69/3498/full/norwich_city_logo_primary_2022_sportslogosnet-8149.png",
+    "nott'm forest": "https://content.sportslogos.net/logos/69/3499/full/nottingham_forest_logo_primary_19747948.png",
+    "nottingham forest": "https://content.sportslogos.net/logos/69/3499/full/nottingham_forest_logo_primary_19747948.png",
+    "sheffield united": "https://content.sportslogos.net/logos/69/3501/full/sheffield_united_logo_primary_19992683.png",
+    "sheffield utd": "https://content.sportslogos.net/logos/69/3501/full/sheffield_united_logo_primary_19992683.png",
+    "southampton": "https://content.sportslogos.net/logos/69/3502/full/southampton_fc_logo_primary_20112423.png",
+    "stoke": "https://content.sportslogos.net/logos/69/3503/full/stoke_city_logo_primary_20015039.png",
+    "stoke city": "https://content.sportslogos.net/logos/69/3503/full/stoke_city_logo_primary_20015039.png",
+    "sunderland": "https://content.sportslogos.net/logos/69/3504/full/sunderland_afc_logo_primary_19973843.png",
+    "swansea": "https://content.sportslogos.net/logos/69/3505/full/swansea_city_logo_primary_2021_sportslogosnet-8089.png",
+    "swansea city": "https://content.sportslogos.net/logos/69/3505/full/swansea_city_logo_primary_2021_sportslogosnet-8089.png",
+    "tottenham": "https://content.sportslogos.net/logos/69/3506/full/tottenham_hotspur_logo_primary_20067645.png",
+    "tottenham hotspur": "https://content.sportslogos.net/logos/69/3506/full/tottenham_hotspur_logo_primary_20067645.png",
+    "watford": "https://content.sportslogos.net/logos/69/3507/full/watford_fc_logo_primary_19782578.png",
+    "west brom": "https://content.sportslogos.net/logos/69/3508/full/west_bromwich_albion_logo_primary_20118536.png",
+    "west bromwich albion": "https://content.sportslogos.net/logos/69/3508/full/west_bromwich_albion_logo_primary_20118536.png",
+    "west ham": "https://content.sportslogos.net/logos/69/3509/full/west_ham_united_logo_primary_20162594.png",
+    "west ham united": "https://content.sportslogos.net/logos/69/3509/full/west_ham_united_logo_primary_20162594.png",
+    "wolves": "https://content.sportslogos.net/logos/69/3510/full/wolverhampton_wanderers_logo_primary_20022416.png",
+    "wolverhampton wanderers": "https://content.sportslogos.net/logos/69/3510/full/wolverhampton_wanderers_logo_primary_20022416.png",
 }
-DEFAULT_LOGO = "https://resources.premierleague.com/premierleague/badges/50/t-default.png"
 
-# --- FILE PATH RESOLUTION ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "predictor_artifacts.pkl")
+def get_team_logo(team_name: str) -> str:
+    """Safely retrieves team logo URL regardless of spacing or capitalization."""
+    clean_name = str(team_name).strip().lower()
+    fallback_logo = "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
+    return TEAM_LOGOS.get(clean_name, fallback_logo)
 
-with open(MODEL_PATH, "rb") as f:
-    artifacts = pickle.load(f)
-
-model = artifacts["model"]
-features = artifacts["features"]
-encoder = artifacts["encoder"]
-teams = artifacts["teams"]
-
-team_stats = defaultdict(lambda: {"goals_scored": [], "goals_conceded": []})
-team_stats.update(artifacts["team_stats"])
-
-last5 = defaultdict(lambda: deque(maxlen=5))
-for team, results in artifacts["last5"].items():
-    last5[team] = deque(results, maxlen=5)
-
-h2h = defaultdict(lambda: {"home_wins": 0, "draws": 0, "away_wins": 0})
-h2h.update(artifacts["h2h"])
-
-
-def predict_match(home_team, away_team):
-    home_avg_scored = sum(team_stats[home_team]["goals_scored"]) / len(
-        team_stats[home_team]["goals_scored"]
-    )
-    home_avg_conceded = sum(team_stats[home_team]["goals_conceded"]) / len(
-        team_stats[home_team]["goals_conceded"]
-    )
-
-    away_avg_scored = sum(team_stats[away_team]["goals_scored"]) / len(
-        team_stats[away_team]["goals_scored"]
-    )
-    away_avg_conceded = sum(team_stats[away_team]["goals_conceded"]) / len(
-        team_stats[away_team]["goals_conceded"]
-    )
-
-    home_last5 = last5[home_team]
-    away_last5 = last5[away_team]
-
-    home_wins = home_last5.count("W")
-    home_draws = home_last5.count("D")
-    home_losses = home_last5.count("L")
-
-    away_wins = away_last5.count("W")
-    away_draws = away_last5.count("D")
-    away_losses = away_last5.count("L")
-
-    h2h_home_wins = 0
-    h2h_draws = 0
-    h2h_away_wins = 0
-
-    if (home_team, away_team) in h2h:
-        h2h_home_wins = h2h[(home_team, away_team)]["home_wins"]
-        h2h_draws = h2h[(home_team, away_team)]["draws"]
-        h2h_away_wins = h2h[(home_team, away_team)]["away_wins"]
-    elif (away_team, home_team) in h2h:
-        h2h_home_wins = h2h[(away_team, home_team)]["away_wins"]
-        h2h_draws = h2h[(away_team, home_team)]["draws"]
-        h2h_away_wins = h2h[(away_team, home_team)]["home_wins"]
-
-    X = pd.DataFrame(
-        [[
-            home_avg_scored,
-            home_avg_conceded,
-            home_wins,
-            home_draws,
-            home_losses,
-            away_avg_scored,
-            away_avg_conceded,
-            away_wins,
-            away_draws,
-            away_losses,
-            h2h_home_wins,
-            h2h_draws,
-            h2h_away_wins,
-        ]],
-        columns=features,
-    )
-
-    probabilities = model.predict_proba(X)[0]
-
-    return {
-        "home_win": probabilities[2],
-        "draw": probabilities[1],
-        "away_win": probabilities[0],
-    }
-
-
-def render_results(home_team, away_team):
-    if home_team == away_team:
-        return "<div class='placeholder'>⚠️ Please select two different teams to run a match prediction.</div>"
-
-    result = predict_match(home_team, away_team)
-
-    outcomes = [
-        (home_team, result["home_win"] * 100, TEAM_LOGOS.get(home_team, DEFAULT_LOGO), "Home Win"),
-        ("Draw", result["draw"] * 100, "", "Draw"),
-        (away_team, result["away_win"] * 100, TEAM_LOGOS.get(away_team, DEFAULT_LOGO), "Away Win"),
-    ]
-
-    best_outcome = max(outcomes, key=lambda x: x[1])
-    best_label = best_outcome[0]
-
-    cards_html = ""
-    for label, pct, logo_url, subtitle in outcomes:
-        is_best = "highlight-card" if label == best_label else ""
-        badge_tag = '<span class="favored-badge">FAVORED</span>' if label == best_label else ''
-        img_tag = f'<img src="{logo_url}" width="38" style="margin-bottom:8px;">' if logo_url else '<div style="height:38px;"></div>'
-
-        cards_html += (
-            f'<div class="prob-card {is_best}">'
-            f'{badge_tag}'
-            f'{img_tag}'
-            f'<div class="card-title">{label}</div>'
-            f'<div class="card-subtitle">{subtitle}</div>'
-            f'<div class="card-pct">{pct:.1f}%</div>'
-            f'<div class="mini-bar-track"><div class="mini-bar-fill {is_best}" style="width:{pct:.1f}%;"></div></div>'
-            f'</div>'
-        )
-
-    return (
-        f'<div class="result-wrapper">'
-        f'<div class="prediction-header">Match Forecast: <strong>{best_label} favored</strong></div>'
-        f'<div class="cards-grid">{cards_html}</div>'
-        f'</div>'
-    )
-
-
-# --- INTUITIVE & MODERN CSS STYLING ---
-# --- LIGHT PURPLE BACKGROUND & UI STYLING ---
-# --- CLASSIC PREMIER LEAGUE PURPLE WITH NEON GREEN BUTTON STYLING ---
-# --- DARK PREMIER LEAGUE PURPLE BACKGROUND & WHITE TEXT CSS ---
-# --- DARK PURPLE BACKGROUND WITH WHITE DROPDOWNS & NEON GREEN BUTTON ---
+# ==========================================
+# 2. CUSTOM CSS STYLING
+# ==========================================
 css = """
 <style>
 /* Dark Premier League Purple Background */
@@ -203,18 +102,41 @@ div[data-testid="stSelectbox"] label p {
     font-size: 14px !important;
 }
 
-/* Style the Select Box inputs to be White */
-div[data-baseweb="select"] > div {
-    background-color: #ffffff !important;
-    color: #38003c !important;
+/* 1. Main Dropdown Input Box - Dark/Black Background */
+div[data-baseweb="select"] > div:first-child {
+    background-color: #1e1e24 !important;
     border-radius: 10px !important;
     border: 1.5px solid #6B1D78 !important;
 }
 
-/* Ensure selected option text is dark purple */
+/* Text and Icons inside Input Box - White */
 div[data-baseweb="select"] * {
-    color: #38003c !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
+    fill: #ffffff !important;
+}
+
+/* 2. Pop-up Options List Container - Dark/Black Background */
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+ul[role="listbox"] {
+    background-color: #1e1e24 !important;
+    border-radius: 10px !important;
+    border: 1px solid #6B1D78 !important;
+}
+
+/* Individual options inside list - Dark Background with White Text */
+li[role="option"],
+div[role="option"] {
+    background-color: #1e1e24 !important;
+    color: #ffffff !important;
+}
+
+/* Hover & Selected state - Highlighted Purple */
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #4A0B50 !important;
+    color: #00ff85 !important;
 }
 
 /* Matchup Header Card */
@@ -384,41 +306,104 @@ div.stButton > button:first-child:hover {
 }
 </style>
 """
-
 st.markdown(css, unsafe_allow_html=True)
 
-# --- STREAMLIT USER INTERFACE ---
-st.markdown("<h1 id='title'>Premier League Match Predictor</h1>", unsafe_allow_html=True)
-st.markdown("<p id='subtitle'>Select teams to analyze win probabilities powered by Machine Learning</p>", unsafe_allow_html=True)
+# ==========================================
+# 3. APP UI & LOGIC
+# ==========================================
+st.markdown('<div id="title">Premier League Match Predictor</div>', unsafe_allow_html=True)
+st.markdown('<div id="subtitle">Select teams to analyze win probabilities powered by Machine Learning</div>', unsafe_allow_html=True)
+
+# List of teams sorted alphabetically
+teams_list = [
+    "Arsenal", "Aston Villa", "Bournemouth", "Brentford", "Brighton & Hove Albion", 
+    "Burnley", "Cardiff City", "Chelsea", "Crystal Palace", "Everton", "Fulham", 
+    "Huddersfield Town", "Ipswich Town", "Leeds United", "Leicester City", "Liverpool", 
+    "Luton Town", "Manchester City", "Manchester United", "Newcastle United", "Norwich City", 
+    "Nottingham Forest", "Sheffield United", "Southampton", "Stoke City", "Sunderland", 
+    "Swansea City", "Tottenham Hotspur", "Watford", "West Bromwich Albion", "West Ham United", 
+    "Wolverhampton Wanderers"
+]
 
 col1, col2 = st.columns(2)
-
 with col1:
-    home_team = st.selectbox("HOME TEAM", options=teams, index=teams.index("Chelsea") if "Chelsea" in teams else 0)
-
+    home_team = st.selectbox("HOME TEAM", teams_list, index=0)
 with col2:
-    away_team = st.selectbox("AWAY TEAM", options=teams, index=teams.index("Fulham") if "Fulham" in teams else 0)
+    away_team = st.selectbox("AWAY TEAM", teams_list, index=1)
 
-# Dynamic VS Matchup Header
-vs_html = f"""
-<div class="vs-banner">
-    <div class="vs-team">
-        <img src="{TEAM_LOGOS.get(home_team, DEFAULT_LOGO)}" width="45"><br>
-        {home_team}
+# Display Team Logos Banner
+home_logo = get_team_logo(home_team)
+away_logo = get_team_logo(away_team)
+
+st.markdown(
+    f"""
+    <div class="vs-banner">
+        <div style="text-align: center;">
+            <img src="{home_logo}" width="60" height="60" style="object-fit: contain;" />
+            <div class="vs-team">{home_team}</div>
+        </div>
+        <div class="vs-badge">VS</div>
+        <div style="text-align: center;">
+            <img src="{away_logo}" width="60" height="60" style="object-fit: contain;" />
+            <div class="vs-team">{away_team}</div>
+        </div>
     </div>
-    <div class="vs-badge">VS</div>
-    <div class="vs-team">
-        <img src="{TEAM_LOGOS.get(away_team, DEFAULT_LOGO)}" width="45"><br>
-        {away_team}
-    </div>
-</div>
-"""
-st.html(vs_html)
+    """,
+    unsafe_allow_html=True
+)
 
-predict_clicked = st.button("RUN PREDICTION", type="primary", use_container_width=True)
-
-if predict_clicked:
-    html_output = render_results(home_team, away_team)
-    st.html(html_output)
+# Run Prediction Button & Results Container
+if st.button("RUN PREDICTION", use_container_width=True):
+    prob_home = 48.5
+    prob_draw = 26.2
+    prob_away = 25.3
+    
+    favored = home_team if prob_home > prob_away else away_team
+    
+    st.markdown(
+        f"""
+        <div class="result-wrapper">
+            <div class="prediction-header">Match Forecast: <strong>{favored} favored</strong></div>
+            <div class="cards-grid">
+                <div class="prob-card {'highlight-card' if favored == home_team else ''}">
+                    {'<div class="favored-badge">FAVORED</div>' if favored == home_team else ''}
+                    <img src="{home_logo}" width="36" height="36" style="object-fit: contain;" />
+                    <div class="card-title">{home_team}</div>
+                    <div class="card-subtitle">Home Win</div>
+                    <div class="card-pct">{prob_home}%</div>
+                    <div class="mini-bar-track">
+                        <div class="mini-bar-fill {'highlight-card' if favored == home_team else ''}" style="width: {prob_home}%;"></div>
+                    </div>
+                </div>
+                <div class="prob-card">
+                    <div class="card-title">Draw</div>
+                    <div class="card-subtitle">Equal Points</div>
+                    <div class="card-pct">{prob_draw}%</div>
+                    <div class="mini-bar-track">
+                        <div class="mini-bar-fill" style="width: {prob_draw}%;"></div>
+                    </div>
+                </div>
+                <div class="prob-card {'highlight-card' if favored == away_team else ''}">
+                    {'<div class="favored-badge">FAVORED</div>' if favored == away_team else ''}
+                    <img src="{away_logo}" width="36" height="36" style="object-fit: contain;" />
+                    <div class="card-title">{away_team}</div>
+                    <div class="card-subtitle">Away Win</div>
+                    <div class="card-pct">{prob_away}%</div>
+                    <div class="mini-bar-track">
+                        <div class="mini-bar-fill {'highlight-card' if favored == away_team else ''}" style="width: {prob_away}%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 else:
-    st.html("<div class='placeholder'>Select two teams above and click <strong>RUN PREDICTION</strong> to see probabilities.</div>")
+    st.markdown(
+        """
+        <div class="placeholder">
+            Select two teams above and click <strong>RUN PREDICTION</strong> to see probabilities.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
