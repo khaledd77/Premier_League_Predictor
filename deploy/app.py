@@ -503,7 +503,7 @@ st.markdown("---")
 st.markdown(
     """
     <div style="text-align: center; color: #8b92a5; font-size: 0.85rem; margin-top: 20px;">
-        Made by <strong>Khaled Gharreb</strong> | Predictor simulates outcomes as if teams faced each other in <strong>2027</strong>.
+        Made by <strong>Khaled Ghareeb</strong> | Predictor simulates outcomes as if teams faced each other in <strong>2027</strong>.
     </div>
     """,
     unsafe_allow_html=True,
