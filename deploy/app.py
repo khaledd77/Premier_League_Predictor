@@ -432,7 +432,9 @@ st.markdown(css, unsafe_allow_html=True)
 st.markdown(
     """
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px;">
-        <img src="https://resources.premierleague.com/premierleague/badges/50/t-default.png" width="48" style="vertical-align: middle; filter: brightness(0) invert(1);">
+        <svg width="45" height="45" viewBox="0 0 1000 1000" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;">
+            <path d="M433.2,143.4c29.1-15.3,62.7-24.1,98.4-24.1c114.7,0,207.7,93,207.7,207.7c0,57.1-23.1,108.8-60.5,146.3c15.3,47.7,7.5,103.3-24.1,146.3c-28.6,39.1-73.8,63.3-123.1,65.3c-2.5,0.1-5,0.1-7.5,0.1c-43.2,0-83.9-13.1-118.1-36.2c-34.2,23.1-74.9,36.2-118.1,36.2c-2.5,0-5,0-7.5-0.1c-49.3-2-94.5-26.2-123.1-65.3c-31.6-43-39.4-98.6-24.1-146.3c-37.4-37.4-60.5-89.1-60.5-146.3c0-114.7,93-207.7,207.7-207.7c35.7,0,69.3,8.8,98.4,24.1C400,123.7,417,132.8,433.2,143.4z M500,75C265.3,75,75,265.3,75,500s190.3,425,425,425s425-190.3,425-425S734.7,75,500,75z"/>
+        </svg>
         <h1 id="title" style="margin: 0; line-height: 1;">Premier League Match Predictor</h1>
     </div>
     """,
