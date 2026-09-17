@@ -441,7 +441,7 @@ with open(LION_PATH, "rb") as f:
 st.markdown(
     f"""
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px;">
-        <img src="data:image/png;base64,{lion_b64}" width="150" style="vertical-align: middle;">
+        <img src="data:image/png;base64,{lion_b64}" width="160" style="vertical-align: middle;">
         <h1 id="title" style="margin: 0; line-height: 1;">Premier League Match Predictor</h1>
     </div>
     """,
@@ -504,7 +504,7 @@ st.markdown("---")
 st.markdown(
     """
     <div style="text-align: center; color: #8b92a5; font-size: 0.85rem; margin-top: 20px;">
-        Made by <strong>Khaled Ghareeb</strong> | Predictor simulates outcomes as if teams faced each other in <strong>2027</strong>.
+        Made by <strong>Khaled Ghareeb</strong>.
     </div>
     """,
     unsafe_allow_html=True,
