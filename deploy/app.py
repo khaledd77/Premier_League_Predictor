@@ -504,7 +504,7 @@ st.markdown("---")
 st.markdown(
     """
     <div style="text-align: center; color: #8b92a5; font-size: 0.85rem; margin-top: 20px;">
-        Made by <strong>Khaled Ghareeb</strong>.
+        Made by <strong>Khaled Ghareeb</strong> | Based on historical team performance from 2017–18 to 2025–26.
     </div>
     """,
     unsafe_allow_html=True,
